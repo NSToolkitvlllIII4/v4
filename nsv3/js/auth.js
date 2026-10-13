@@ -282,7 +282,9 @@
         };
 
 
-        sessionStorage.setItem(
+        // UPDATED: Persist session after browser closes.
+
+        localStorage.setItem(
 
             SESSION_KEY,
 
@@ -304,8 +306,10 @@
 
     function getCurrentUser() {
 
+        // UPDATED: Read persistent session.
+
         const saved =
-            sessionStorage.getItem(
+            localStorage.getItem(
                 SESSION_KEY
             );
 
@@ -329,7 +333,7 @@
                 !session.expirationTime
             ) {
 
-                sessionStorage.removeItem(
+                localStorage.removeItem(
                     SESSION_KEY
                 );
 
@@ -349,7 +353,7 @@
                 )
             ) {
 
-                sessionStorage.removeItem(
+                localStorage.removeItem(
                     SESSION_KEY
                 );
 
@@ -372,7 +376,7 @@
                 currentDevice
             ) {
 
-                sessionStorage.removeItem(
+                localStorage.removeItem(
                     SESSION_KEY
                 );
 
@@ -395,7 +399,7 @@
                 session.username.toLowerCase()
             ) {
 
-                sessionStorage.removeItem(
+                localStorage.removeItem(
                     SESSION_KEY
                 );
 
@@ -415,7 +419,7 @@
             );
 
 
-            sessionStorage.removeItem(
+            localStorage.removeItem(
                 SESSION_KEY
             );
 
@@ -875,7 +879,9 @@
 
     function logout() {
 
-        sessionStorage.removeItem(
+        // UPDATED: Remove persistent session on logout.
+
+        localStorage.removeItem(
             SESSION_KEY
         );
 
