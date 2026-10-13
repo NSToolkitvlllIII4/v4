@@ -39,22 +39,19 @@
     // GET SESSION
     // ==========================================
 
-    function getSavedSession() {
+function getSavedSession() {
 
-        /*
-         * IMPORTANT:
-         *
-         * auth.js stores the login session
-         * inside sessionStorage.
-         *
-         * Do NOT use localStorage here.
-         */
+    /*
+     * Read the persistent session created by auth.js.
+     * This allows login to remain active after
+     * closing and reopening the browser.
+     */
 
-        return sessionStorage.getItem(
-            SESSION_KEY
-        );
+    return localStorage.getItem(
+        SESSION_KEY
+    );
 
-    }
+}
 
 
 
@@ -62,13 +59,13 @@
     // REMOVE SESSION
     // ==========================================
 
-    function clearSession() {
+ function clearSession() {
 
-        sessionStorage.removeItem(
-            SESSION_KEY
-        );
+    localStorage.removeItem(
+        SESSION_KEY
+    );
 
-    }
+}
 
 
 
