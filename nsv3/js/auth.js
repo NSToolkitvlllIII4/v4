@@ -1095,3 +1095,111 @@
 
 
 })();
+
+    // ==================================================
+    // ADDITIVE FIX: LOGIN STATUS WATCHDOG
+    // Prevents authentication status from staying stuck.
+    // ==================================================
+
+    (function () {
+
+        "use strict";
+
+        let watchdog = null;
+        let errorCheck = null;
+
+        function clearWatchdog() {
+
+            if (watchdog) {
+                clearTimeout(watchdog);
+                watchdog = null;
+            }
+
+            if (errorCheck) {
+                clearInterval(errorCheck);
+                errorCheck = null;
+            }
+
+        }
+
+        function cleanupLoginEffect() {
+
+            const effect = document.getElementById(
+                "nsLoginDynamicFX"
+            );
+
+            if (effect) {
+                effect.remove();
+            }
+
+            document.body.classList.remove(
+                "ns-login-revealing"
+            );
+
+        }
+
+        document.addEventListener(
+            "nsLoginSuccess",
+            function () {
+
+                clearWatchdog();
+
+                // Allow the success message to display.
+                setTimeout(function () {
+                    cleanupLoginEffect();
+                }, 1200);
+
+            }
+        );
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const button = document.getElementById(
+                    "nsLoginButton"
+                );
+
+                const errorBox = document.getElementById(
+                    "nsLoginError"
+                );
+
+                if (!button || !errorBox) {
+                    return;
+                }
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        clearWatchdog();
+
+                        // Fallback: never leave the animation
+                        // running indefinitely.
+                        watchdog = setTimeout(function () {
+
+                            cleanupLoginEffect();
+                            clearWatchdog();
+
+                        }, 12000);
+
+                        errorCheck = setInterval(function () {
+
+                            if (
+                                errorBox.textContent.trim()
+                            ) {
+
+                                cleanupLoginEffect();
+                                clearWatchdog();
+
+                            }
+
+                        }, 100);
+
+                    }
+                );
+
+            }
+        );
+
+    })();
