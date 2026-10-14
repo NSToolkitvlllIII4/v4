@@ -444,7 +444,7 @@
         if (!user) {
 
             window.location.href =
-                "./index.html";
+                "/nsv3/index.html";
 
             return false;
 
@@ -887,7 +887,7 @@
 
 
         window.location.href =
-            "./index.html";
+            "/nsv3/index.html";
 
     }
 
