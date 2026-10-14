@@ -29,7 +29,7 @@
 
     const LOGIN_PAGE =
         new URL(
-            "./index.html",
+            "/nsv3/index.html",
             window.location.href
         ).href;
 
@@ -297,7 +297,7 @@ function getSavedSession() {
 
         const loginPath =
             new URL(
-                "./index.html",
+                "/nsv3/index.html",
                 window.location.href
             ).pathname;
 
@@ -311,7 +311,7 @@ function getSavedSession() {
                 loginPath ||
 
             currentPath.endsWith(
-                "/index.html"
+                "/nsv3/index.html"
             )
         ) {
 
