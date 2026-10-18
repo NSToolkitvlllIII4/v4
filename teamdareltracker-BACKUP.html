@@ -59,6 +59,49 @@
             text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
+        /* Live Dual World Clock Widget */
+        .world-clock-box {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .clock-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .clock-divider {
+            width: 1px;
+            height: 25px;
+            background-color: var(--input-border);
+            margin: 0 10px;
+        }
+
+        .clock-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+
+        .clock-time {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.05rem;
+            color: var(--bright-gold);
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+
         /* Mode Toggle Tabs */
         .tab-container {
             display: flex;
@@ -383,6 +426,19 @@
 <div class="form-container">
     <h2>Team Darel Tracker Q3</h2>
 
+    <!-- Live Dual World Clock Widget -->
+    <div class="world-clock-box">
+        <div class="clock-item">
+            <div class="clock-label">PH Time (UTC+8)</div>
+            <div class="clock-time" id="phClock">--:--:-- --</div>
+        </div>
+        <div class="clock-divider"></div>
+        <div class="clock-item">
+            <div class="clock-label">UTC-5:00 Time</div>
+            <div class="clock-time" id="utc5Clock">--:--:-- --</div>
+        </div>
+    </div>
+
     <!-- Form Mode Tabs -->
     <div class="tab-container">
         <button type="button" class="tab-btn active" id="btnProgress" onclick="setMode('progress')">In Progress Mode</button>
@@ -401,11 +457,12 @@
                 <select id="dataAnalyst" name="dataAnalyst" required>
                     <option value="">-- Select Analyst --</option>
                     <option value="Daniela Joy.Cervantes">Daniela Joy.Cervantes</option>
-                    <option value="Jonell.Julao">Jonell.Julao</option>
+                    <option value="Ross Jhem.Acopio">Ross Jhem.Acopio</option>
                     <option value="Rosa Camille Teodosio.Macasieb">Rosa Camille Teodosio.Macasieb</option>
                     <option value="Ehren Patrick.Pangilinan">Ehren Patrick.Pangilinan</option>
                     <option value="Rafael Anjello.Rivera">Rafael Anjello.Rivera</option>
                     <option value="Andrea.Sunga">Andrea.Sunga</option>
+					<option value="Florelyn.Tongol">Florelyn.Tongol</option>
                 </select>
             </div>
         </div>
@@ -417,14 +474,14 @@
             </div>
             <div class="form-group">
                 <label for="poiUrl">POI Link (URL)</label>
-                <input type="url" id="poiUrl" name="poiUrl" placeholder="https://next.socialmediareportbuilder.com/">
+                <input type="url" id="poiUrl" name="poiUrl" placeholder="https://next.socialmediareportbuilder.com/" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="client">Client</label>
-                <input type="text" id="client" name="client" placeholder="Client Name">
+                <input type="text" id="client" name="client" placeholder="Client Name" required>
             </div>
             <div class="form-group">
                 <label for="status">Status</label>
@@ -441,7 +498,7 @@
             </div>
             <div class="form-group">
                 <label for="activeNotActive">Active / Not Active</label>
-                <select id="activeNotActive" name="activeNotActive">
+                <select id="activeNotActive" name="activeNotActive" required>
                     <option value="">-- Select Option --</option>
                     <option value="Active">Active</option>
                     <option value="Not Active">Not Active</option>
@@ -493,6 +550,21 @@
 </div>
 
 <script>
+    // Live Dual World Clock Logic
+    function updateClocks() {
+        const now = new Date();
+        
+        // PH Time (UTC+8)
+        const phOptions = { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        document.getElementById('phClock').innerText = new Intl.DateTimeFormat([], phOptions).format(now);
+
+        // UTC-5:00 Time (e.g., Eastern Standard Time / America/New_York)
+        const utc5Options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        document.getElementById('utc5Clock').innerText = new Intl.DateTimeFormat([], utc5Options).format(now);
+    }
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
     function showNsAlert(message) {
         document.getElementById('ns-alert-text').innerText = message;
         const alertOverlay = document.getElementById('ns-custom-alert');
@@ -637,17 +709,17 @@
 </script>
 <script>
 document.addEventListener("keydown", function(e) {
-  // Block F12 and common shortcuts (Ctrl+Shift+I/J, Ctrl+U)
-  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
-    e.preventDefault();
-    return false;
-  }
+  // Block F12 and common shortcuts (Ctrl+Shift+I/J, Ctrl+U)
+  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+    e.preventDefault();
+    return false;
+  }
 });
 
 document.addEventListener("keydown", function(e) {
-  if (e.ctrlKey && e.shiftKey && e.key === "C") {
-    e.preventDefault();
-  }
+  if (e.ctrlKey && e.shiftKey && e.key === "C") {
+    e.preventDefault();
+  }
 });
 // Optional: Disable right-click
 document.addEventListener("contextmenu", e => e.preventDefault());
