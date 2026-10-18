@@ -447,84 +447,101 @@
 
     <form id="trackerForm">
         
-        <div class="form-row">
-            <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" required>
-            </div>
-            <div class="form-group">
-                <label for="dataAnalyst">Data Analyst</label>
-                <select id="dataAnalyst" name="dataAnalyst" required>
-                    <option value="">-- Select Analyst --</option>
-                    <option value="Daniela Joy.Cervantes">Daniela Joy.Cervantes</option>
-                    <option value="Ross Jhem.Acopio">Ross Jhem.Acopio</option>
-                    <option value="Rosa Camille Teodosio.Macasieb">Rosa Camille Teodosio.Macasieb</option>
-                    <option value="Ehren Patrick.Pangilinan">Ehren Patrick.Pangilinan</option>
-                    <option value="Rafael Anjello.Rivera">Rafael Anjello.Rivera</option>
-                    <option value="Andrea.Sunga">Andrea.Sunga</option>
-					<option value="Florelyn.Tongol">Florelyn.Tongol</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="poiName">Name of POI</label>
-                <input type="text" id="poiName" name="poiName" placeholder="E.g., John Smith" required>
-            </div>
-            <div class="form-group">
-                <label for="poiUrl">POI Link (URL)</label>
-                <input type="url" id="poiUrl" name="poiUrl" placeholder="https://next.socialmediareportbuilder.com/" required>
-            </div>
-        </div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required>
+    </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="client">Client</label>
-                <input type="text" id="client" name="client" placeholder="Client Name" required>
-            </div>
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    <!-- Options populated by JavaScript based on Mode -->
-                </select>
-            </div>
-        </div>
+    <div class="form-group">
+        <label for="dataAnalyst">Data Analyst</label>
+        <select id="dataAnalyst" name="dataAnalyst" required>
+            <option value="">-- Select Analyst --</option>
+            <option value="Daniela Joy.Cervantes">Daniela Joy.Cervantes</option>
+            <option value="Ross Jhem.Acopio">Ross Jhem.Acopio</option>
+            <option value="Rosa Camille Teodosio.Macasieb">Rosa Camille Teodosio.Macasieb</option>
+            <option value="Ehren Patrick.Pangilinan">Ehren Patrick.Pangilinan</option>
+            <option value="Rafael Anjello.Rivera">Rafael Anjello.Rivera</option>
+            <option value="Andrea.Sunga">Andrea.Sunga</option>
+            <option value="Florelyn.Tongol">Florelyn.Tongol</option>
+        </select>
+    </div>
+</div>
 
-        <div class="form-row full-only">
-            <div class="form-group">
-                <label for="aht">AHT</label>
-                <input type="text" id="aht" name="aht" placeholder="E.g., 15 (in mins)">
-            </div>
-            <div class="form-group">
-                <label for="activeNotActive">Active / Not Active</label>
-                <select id="activeNotActive" name="activeNotActive" required>
-                    <option value="">-- Select Option --</option>
-                    <option value="Active">Active</option>
-                    <option value="Not Active">Not Active</option>
-                </select>
-            </div>
-        </div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="poiName">Name of POI</label>
+        <input type="text" id="poiName" name="poiName"
+               placeholder="E.g., John Smith" required>
+    </div>
 
-        <div class="form-row full-only">
-            <div class="form-group">
-                <label for="numScreenshots"># Screenshots</label>
-                <input type="number" id="numScreenshots" name="numScreenshots" min="0" placeholder="0">
-            </div>
-            <div class="form-group">
-                <label for="numVideos"># Videos</label>
-                <input type="number" id="numVideos" name="numVideos" min="0" placeholder="0">
-            </div>
-            <div class="form-group">
-                <label for="numAccounts"># Accounts</label>
-                <input type="number" id="numAccounts" name="numAccounts" min="0" placeholder="0">
-            </div>
-        </div>
+    <div class="form-group">
+        <label for="poiUrl">POI Link (URL)</label>
+        <input type="url" id="poiUrl" name="poiUrl"
+               placeholder="https://next.socialmediareportbuilder.com/"
+               required>
+    </div>
+</div>
 
-        <div class="form-group full-only">
-            <label for="comment">Comment</label>
-            <textarea id="comment" name="comment" placeholder="Add any comments or notes here..."></textarea>
-        </div>
+<div class="form-row">
+    <div class="form-group">
+        <label for="client">Client</label>
+        <input type="text" id="client" name="client"
+               placeholder="Client Name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+            <!-- Options populated by JavaScript based on Mode -->
+        </select>
+    </div>
+</div>
+
+<div class="form-row full-only">
+    <div class="form-group">
+        <label for="aht">AHT</label>
+        <input type="number" id="aht" name="aht"
+               placeholder="E.g., 15 (in mins)" min="0" required>
+    </div>
+
+    <div class="form-group">
+        <label for="activeNotActive">Active / Not Active</label>
+        <select id="activeNotActive" name="activeNotActive" required>
+            <option value="">-- Select Option --</option>
+            <option value="Active">Active</option>
+            <option value="Not Active">Not Active</option>
+        </select>
+    </div>
+</div>
+
+<div class="form-row full-only">
+    <div class="form-group">
+        <label for="numScreenshots"># Screenshots</label>
+        <input type="number" id="numScreenshots" name="numScreenshots"
+               min="0" placeholder="0" required>
+    </div>
+
+    <div class="form-group">
+        <label for="numVideos"># Videos</label>
+        <input type="number" id="numVideos" name="numVideos"
+               min="0" placeholder="0" required>
+    </div>
+
+    <div class="form-group">
+        <label for="numAccounts"># Accounts</label>
+        <input type="number" id="numAccounts" name="numAccounts"
+               min="0" placeholder="0" required>
+    </div>
+</div>
+
+<div class="form-group full-only">
+    <label for="comment">Comment</label>
+    <textarea id="comment" name="comment"
+              placeholder="Add any comments or notes here..."
+              required></textarea>
+</div>
 
         <button type="submit" id="submitBtn" class="submit-btn">Submit Data</button>
         <div id="loading">Submitting to Tracker...</div>
