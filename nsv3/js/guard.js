@@ -1,3 +1,4 @@
+
 (function () {
 
     "use strict";
@@ -39,19 +40,18 @@
     // GET SESSION
     // ==========================================
 
-function getSavedSession() {
+    function getSavedSession() {
 
-    /*
-     * Read the persistent session created by auth.js.
-     * This allows login to remain active after
-     * closing and reopening the browser.
-     */
+        /*
+         * Read the persistent session created by auth.js.
+         * The session is stored in localStorage.
+         */
 
-    return localStorage.getItem(
-        SESSION_KEY
-    );
+        return localStorage.getItem(
+            SESSION_KEY
+        );
 
-}
+    }
 
 
 
@@ -59,13 +59,13 @@ function getSavedSession() {
     // REMOVE SESSION
     // ==========================================
 
- function clearSession() {
+    function clearSession() {
 
-    localStorage.removeItem(
-        SESSION_KEY
-    );
+        localStorage.removeItem(
+            SESSION_KEY
+        );
 
-}
+    }
 
 
 
@@ -112,7 +112,6 @@ function getSavedSession() {
                 "Invalid NS ToolKits session."
             );
 
-
             clearSession();
 
             redirectToMainPage();
@@ -137,7 +136,6 @@ function getSavedSession() {
             console.warn(
                 "Incomplete NS ToolKits session."
             );
-
 
             clearSession();
 
@@ -176,7 +174,6 @@ function getSavedSession() {
                 "Invalid NS ToolKits session timestamps."
             );
 
-
             clearSession();
 
             redirectToMainPage();
@@ -199,7 +196,6 @@ function getSavedSession() {
                 "Invalid NS ToolKits expiration time."
             );
 
-
             clearSession();
 
             redirectToMainPage();
@@ -210,16 +206,8 @@ function getSavedSession() {
 
 
         // --------------------------------------
-        // OPTIONAL SAFETY CHECK
+        // SESSION DURATION SAFETY CHECK
         // --------------------------------------
-        //
-        // The session should be approximately
-        // 10 hours long.
-        //
-        // We allow a small tolerance instead of
-        // rejecting a legitimate session because
-        // of a minor timestamp difference.
-        //
 
         const sessionLength =
             expirationTime -
@@ -237,7 +225,6 @@ function getSavedSession() {
             console.warn(
                 "Invalid NS ToolKits session duration."
             );
-
 
             clearSession();
 
@@ -264,7 +251,6 @@ function getSavedSession() {
             console.log(
                 "NS ToolKits session expired."
             );
-
 
             clearSession();
 
@@ -307,9 +293,7 @@ function getSavedSession() {
         // --------------------------------------
 
         if (
-            currentPath ===
-                loginPath ||
-
+            currentPath === loginPath ||
             currentPath.endsWith(
                 "/nsv3/index.html"
             )
@@ -394,159 +378,6 @@ function getSavedSession() {
         SESSION_CHECK_INTERVAL
     );
 
-
-    // ==========================================
-    // 60-MINUTE INACTIVITY TIMEOUT
-    // ==========================================
-
-    const INACTIVITY_LIMIT =
-        60 * 60 * 1000;
-
-    const LAST_ACTIVITY_KEY =
-        "nsToolkitLastActivity";
-
-
-    // Record user activity
-    function recordUserActivity() {
-
-        if (!getSavedSession()) {
-            return;
-        }
-
-        const now = Date.now();
-
-        const lastActivity = Number(
-            localStorage.getItem(LAST_ACTIVITY_KEY)
-        );
-
-        // Update at most once every 30 seconds
-        // to avoid excessive localStorage writes.
-        if (
-            !Number.isFinite(lastActivity) ||
-            now - lastActivity >= 30 * 1000
-        ) {
-            localStorage.setItem(
-                LAST_ACTIVITY_KEY,
-                String(now)
-            );
-        }
-    }
-
-
-    // Check whether the user has been inactive
-    function checkInactivity() {
-
-        if (!getSavedSession()) {
-            return;
-        }
-
-        const now = Date.now();
-
-        let lastActivity = Number(
-            localStorage.getItem(LAST_ACTIVITY_KEY)
-        );
-
-        // Initialize the timer for existing sessions
-        // that do not have an activity timestamp yet.
-        if (
-            !Number.isFinite(lastActivity) ||
-            lastActivity <= 0
-        ) {
-            localStorage.setItem(
-                LAST_ACTIVITY_KEY,
-                String(now)
-            );
-
-            return;
-        }
-
-        // Log out after 60 minutes without activity.
-        if (
-            now - lastActivity >= INACTIVITY_LIMIT
-        ) {
-            clearSession();
-
-            localStorage.removeItem(
-                LAST_ACTIVITY_KEY
-            );
-
-            redirectToMainPage();
-        }
-    }
-
-
-    // Activities that reset the inactivity timer
-    [
-        "mousemove",
-        "mousedown",
-        "keydown",
-        "scroll",
-        "touchstart",
-        "click"
-    ].forEach(function (eventName) {
-
-        document.addEventListener(
-            eventName,
-            recordUserActivity,
-            { passive: true }
-        );
-
-    });
-
-
-    // Check inactivity periodically
-    setInterval(
-        checkInactivity,
-        60 * 1000
-    );
-
-
-    // Check again when the user returns to the tab
-    document.addEventListener(
-        "visibilitychange",
-        function () {
-
-            if (
-                document.visibilityState === "visible"
-            ) {
-                checkInactivity();
-            }
-
-        }
-    );
-
-
-    // Sync activity between tabs using the same origin
-    window.addEventListener(
-        "storage",
-        function (event) {
-
-            if (event.key === LAST_ACTIVITY_KEY) {
-                checkInactivity();
-            }
-
-        }
-    );
-
-
-    // Initialize activity tracking for an existing session
-    if (getSavedSession()) {
-
-        const existingActivity = Number(
-            localStorage.getItem(LAST_ACTIVITY_KEY)
-        );
-
-        if (
-            !Number.isFinite(existingActivity) ||
-            existingActivity <= 0
-        ) {
-            localStorage.setItem(
-                LAST_ACTIVITY_KEY,
-                String(Date.now())
-            );
-        }
-
-    }
 
 
     // ==========================================
