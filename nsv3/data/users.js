@@ -136,6 +136,7 @@ window.NS_USERS = [
 
   //DayShift
   { username: "Lorenz1", pinHash: "1e12c1e01097cf3861ff603cd173c6b4376ee0a3e438ab7c92a7ae68a245dea8", team: "Day-Shift", role: "member" },
+  { username: "AiraG1", pinHash: "04e729a9c402868a8c432e803ed75b7c3f9f16b798c8f3bd07a90bebd9a7dac9", team: "Day-Shift", role: "member" },
 
   // TeamFannie
   { username: "TeamFannie_01", pinHash: "e78f27ab3ef177a9926e6b90e572b9853ce6cf4d87512836e9ae85807ec9d7fe", team: "TeamFannie", role: "member" },
