@@ -235,25 +235,33 @@
 
         /* =====================================================
            TEAM SECTION
+           UPDATED: THREE CENTERED DEVELOPER CARDS
         ===================================================== */
 
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            /* Three equal-width columns keep every developer
+               on the same row and centered within the container. */
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+
             gap: 30px;
-            margin-bottom: 100px;
+            width: 100%;
+            margin: 0 auto 100px;
+            align-items: stretch;
         }
 
         .member-card {
             position: relative;
             overflow: hidden;
+            min-width: 0;
             background:
                 linear-gradient(
                     145deg,
                     rgba(255, 255, 255, 0.065),
                     rgba(255, 255, 255, 0.025)
                 );
-            padding: 45px 25px 40px;
+            padding: 45px 20px 40px;
             border-radius: 25px;
             border: 1px solid var(--border);
             text-align: center;
@@ -308,6 +316,7 @@
             position: relative;
             width: 125px;
             height: 125px;
+            max-width: 100%;
             border-radius: 50%;
             background-color: #222;
             background-size: cover;
@@ -345,9 +354,10 @@
             position: relative;
             z-index: 2;
             margin: 0 0 8px;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: 0.3px;
+            overflow-wrap: anywhere;
         }
 
         .member-role {
@@ -505,6 +515,28 @@
 
         @media (max-width: 900px) {
 
+            /* Three cards fit on larger tablets when space allows. */
+            .team-grid {
+                gap: 18px;
+            }
+
+            .member-card {
+                padding: 35px 14px;
+            }
+
+            .avatar {
+                width: 110px;
+                height: 110px;
+            }
+
+            .member-card h3 {
+                font-size: 1.05rem;
+            }
+
+            .member-role {
+                letter-spacing: 2px;
+            }
+
             .tester-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
@@ -530,10 +562,17 @@
                 line-height: 1.8;
             }
 
+            /* Two columns on tablets; final card is centered. */
             .team-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 20px;
                 margin-bottom: 75px;
+            }
+
+            .member-card:last-child {
+                grid-column: 1 / -1;
+                width: calc(50% - 10px);
+                justify-self: center;
             }
 
             .tester-grid {
@@ -551,15 +590,34 @@
             }
         }
 
-        @media (max-width: 430px) {
+        @media (max-width: 480px) {
 
-            .tester-grid {
-                grid-template-columns: 1fr;
+            /* One card per row on narrow phones. */
+            .team-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 20px;
+            }
+
+            .member-card:last-child {
+                grid-column: auto;
+                width: 100%;
+            }
+
+            .member-card {
+                padding: 35px 20px;
+            }
+
+            .member-card h3 {
+                font-size: 1.2rem;
             }
 
             .avatar {
                 width: 115px;
                 height: 115px;
+            }
+
+            .tester-grid {
+                grid-template-columns: 1fr;
             }
 
             .about-box {
@@ -677,7 +735,8 @@
 
             </div>
 
-                        <div class="member-card">
+
+            <div class="member-card">
 
                 <div
                     class="avatar"
