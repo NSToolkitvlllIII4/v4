@@ -1,0 +1,223 @@
+
+<!-- NS TOOLKITS ANNOUNCEMENT POPUP -->
+<style>
+  #nsAnnouncementOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.76);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    animation: nsOverlayFade 0.3s ease;
+  }
+
+  #nsAnnouncementOverlay.ns-hidden {
+    display: none;
+  }
+
+  .ns-announcement-card {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    padding: 30px;
+    overflow: hidden;
+    color: #f5f5f5;
+    background: linear-gradient(145deg, #191919, #101010);
+    border: 1px solid rgba(212, 175, 55, 0.48);
+    border-radius: 18px;
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(212, 175, 55, 0.08);
+    font-family: Inter, Arial, sans-serif;
+    animation: nsPopupEnter 0.4s ease;
+  }
+
+  .ns-announcement-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #8b6b16, #f5d76e, #b38b20);
+  }
+
+  .ns-announcement-close {
+    position: absolute;
+    top: 13px;
+    right: 15px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bdbdbd;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .ns-announcement-close:hover {
+    color: #fff;
+    background: #a98725;
+    transform: rotate(90deg);
+  }
+
+  .ns-announcement-icon {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    color: #f5d76e;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 15px;
+    font-size: 27px;
+  }
+
+  .ns-announcement-label {
+    margin-bottom: 9px;
+    color: #d7b84b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .ns-announcement-title {
+    margin: 0 35px 12px 0;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+
+  .ns-announcement-message {
+    margin: 0 0 24px;
+    color: #c2c2c2;
+    font-size: 14px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  .ns-announcement-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 17px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .ns-announcement-brand {
+    color: #777;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .ns-announcement-ok {
+    padding: 10px 20px;
+    color: #17130a;
+    background: linear-gradient(135deg, #f2d46b, #c5a238);
+    border: none;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .ns-announcement-ok:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+  }
+
+  @keyframes nsOverlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes nsPopupEnter {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ns-announcement-card {
+      padding: 25px 22px;
+      border-radius: 15px;
+    }
+
+    .ns-announcement-title {
+      font-size: 22px;
+    }
+
+    .ns-announcement-message {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<div id="nsAnnouncementOverlay"
+     class="ns-hidden"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="nsAnnouncementTitle">
+
+  <div class="ns-announcement-card">
+    <button type="button"
+            class="ns-announcement-close"
+            id="nsAnnouncementClose"
+            aria-label="Close announcement">
+      &times;
+    </button>
+
+    <div class="ns-announcement-icon" aria-hidden="true">📢</div>
+
+    <div class="ns-announcement-label">
+      NS Toolkits • Announcement
+    </div>
+
+    <h2 class="ns-announcement-title" id="nsAnnouncementTitle">
+      Important Announcement
+    </h2>
+
+    <p class="ns-announcement-message" id="nsAnnouncementMessage">Welcome to NS Toolkits!
+
+We have some exciting updates to share with you!
+- Excellence Extractor (Excellence xStrings): A new version is now available! Check it out on the main page.
+- Extension Updates: Several of our extensions have also been updated with improvements and enhancements.
+Be sure to check out the latest updates and enjoy the improved tools!
+
+Someone may have copied our hard work and website idea, but this will only push us to do better. NS Toolkits is moving forward to V4 soon! — bringing more extensions, more powerful toolkits, improved features, and new ideas. This is just the beginning. Thank you for being part of NS Toolkits.
+
+Developers:
+Darel Miranda | Morvan Hsu | Milles Jethro Del Rosario</p>
+
+    <div class="ns-announcement-footer">
+      <span class="ns-announcement-brand">NS Toolkits v3</span>
+
+      <button type="button"
+              class="ns-announcement-ok"
+              id="nsAnnouncementOk">
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
