@@ -3019,6 +3019,12 @@ document.addEventListener("contextmenu", e => e.preventDefault());
 
                     fx.classList.add("ns-dyn-verified");
 
+
+                    if (typeof window.nsShowAnnouncement === "function") {
+  window.nsShowAnnouncement();
+} else {
+  console.warn("NS Announcement script is not loaded yet.");
+}
                     /*
                      * Give the user a visible successful-validation moment,
                      * then reveal the entire website.
