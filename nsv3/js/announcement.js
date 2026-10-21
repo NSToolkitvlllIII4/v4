@@ -9,7 +9,6 @@
   const STORAGE_KEY = "nsAnnouncementLastShown";
   const TEN_HOURS = 10 * 60 * 60 * 1000;
 
-  // Keep announcement.html in your website root.
   const POPUP_URL = new URL(
     "../announcement.html",
     document.currentScript.src
@@ -46,14 +45,13 @@
         localStorage.getItem(STORAGE_KEY)
       ) || 0;
     } catch (error) {
-      console.warn(
-        "Announcement storage unavailable:",
-        error
-      );
+      console.warn("Announcement storage unavailable:", error);
     }
 
     const now = Date.now();
 
+    // Force display after every successful login.
+    // Otherwise, show on first visit or after 10 hours.
     if (
       force ||
       !lastShown ||
@@ -62,15 +60,9 @@
       overlay.classList.remove("ns-hidden");
 
       try {
-        localStorage.setItem(
-          STORAGE_KEY,
-          String(now)
-        );
+        localStorage.setItem(STORAGE_KEY, String(now));
       } catch (error) {
-        console.warn(
-          "Could not save announcement time:",
-          error
-        );
+        console.warn("Could not save announcement time:", error);
       }
     }
   }
@@ -79,26 +71,15 @@
     if (initialized) return;
 
     const overlay = getOverlay();
-    const closeButton = document.getElementById(
-      "nsAnnouncementClose"
-    );
-    const okButton = document.getElementById(
-      "nsAnnouncementOk"
-    );
+    const closeButton = document.getElementById("nsAnnouncementClose");
+    const okButton = document.getElementById("nsAnnouncementOk");
 
     if (!overlay || !closeButton || !okButton) return;
 
     initialized = true;
 
-    closeButton.addEventListener(
-      "click",
-      closeAnnouncement
-    );
-
-    okButton.addEventListener(
-      "click",
-      closeAnnouncement
-    );
+    closeButton.addEventListener("click", closeAnnouncement);
+    okButton.addEventListener("click", closeAnnouncement);
 
     overlay.addEventListener("click", function (event) {
       if (event.target === overlay) {
@@ -112,17 +93,19 @@
       }
     });
 
-    // Automatically show on first visit or after 10 hours.
+    // Automatic display for first visit or when 10 hours have elapsed.
     showAnnouncement(false);
   }
 
-  // Call this after a successful login to force the popup.
+  // ==========================================
+  // SHOW AFTER EVERY SUCCESSFUL LOGIN
+  // ==========================================
+
   window.nsShowAnnouncement = function () {
     showAnnouncement(true);
   };
 
   async function loadAnnouncement() {
-    // Avoid inserting the popup more than once.
     if (getOverlay()) {
       initializeAnnouncement();
       return;
@@ -135,8 +118,7 @@
 
       if (!response.ok) {
         throw new Error(
-          "Could not load announcement.html: " +
-          response.status
+          "Could not load announcement.html: " + response.status
         );
       }
 
@@ -145,14 +127,12 @@
 
       template.innerHTML = html;
 
-      // Preserve the CSS by adding all styles to the page.
-      template.content.querySelectorAll("style").forEach(
-        function (style) {
-          document.head.appendChild(style.cloneNode(true));
-        }
-      );
+      // Add popup CSS to the page.
+      template.content.querySelectorAll("style").forEach(function (style) {
+        document.head.appendChild(style.cloneNode(true));
+      });
 
-      // Add the popup itself to the page.
+      // Add the popup HTML to the page.
       const overlay = template.content.querySelector(
         "#nsAnnouncementOverlay"
       );
@@ -168,19 +148,14 @@
       initializeAnnouncement();
 
     } catch (error) {
-      console.error(
-        "NS Toolkits announcement failed to load:",
-        error
-      );
+      console.error("NS Toolkits announcement failed to load:", error);
     }
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      loadAnnouncement,
-      { once: true }
-    );
+    document.addEventListener("DOMContentLoaded", loadAnnouncement, {
+      once: true
+    });
   } else {
     loadAnnouncement();
   }
