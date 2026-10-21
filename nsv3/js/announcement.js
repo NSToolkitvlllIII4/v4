@@ -9,12 +9,19 @@
   const STORAGE_KEY = "nsAnnouncementLastShown";
   const TEN_HOURS = 10 * 60 * 60 * 1000;
 
+  const scriptElement = document.currentScript;
+  const scriptURL = scriptElement
+    ? scriptElement.src
+    : window.location.href;
+
   const POPUP_URL = new URL(
     "../announcement.html",
-    document.currentScript.src
+    scriptURL
   ).href;
 
   let initialized = false;
+  let loadingPromise = null;
+  let forceAfterLoad = false;
 
   function getOverlay() {
     return document.getElementById("nsAnnouncementOverlay");
@@ -22,7 +29,7 @@
 
   function isVisible() {
     const overlay = getOverlay();
-    return overlay && !overlay.classList.contains("ns-hidden");
+    return !!overlay && !overlay.classList.contains("ns-hidden");
   }
 
   function closeAnnouncement() {
@@ -36,22 +43,28 @@
   function showAnnouncement(force) {
     const overlay = getOverlay();
 
-    if (!overlay || isVisible()) return;
+    // If the popup HTML has not loaded yet, queue the request.
+    if (!overlay) {
+      if (force) {
+        forceAfterLoad = true;
+        loadAnnouncement();
+      }
+      return;
+    }
+
+    if (isVisible()) return;
 
     let lastShown = 0;
 
     try {
-      lastShown = Number(
-        localStorage.getItem(STORAGE_KEY)
-      ) || 0;
+      lastShown =
+        Number(localStorage.getItem(STORAGE_KEY)) || 0;
     } catch (error) {
       console.warn("Announcement storage unavailable:", error);
     }
 
     const now = Date.now();
 
-    // Force display after every successful login.
-    // Otherwise, show on first visit or after 10 hours.
     if (
       force ||
       !lastShown ||
@@ -71,10 +84,19 @@
     if (initialized) return;
 
     const overlay = getOverlay();
-    const closeButton = document.getElementById("nsAnnouncementClose");
-    const okButton = document.getElementById("nsAnnouncementOk");
+    const closeButton = document.getElementById(
+      "nsAnnouncementClose"
+    );
+    const okButton = document.getElementById(
+      "nsAnnouncementOk"
+    );
 
-    if (!overlay || !closeButton || !okButton) return;
+    if (!overlay || !closeButton || !okButton) {
+      console.error(
+        "Announcement initialization failed: required popup elements are missing."
+      );
+      return;
+    }
 
     initialized = true;
 
@@ -93,69 +115,117 @@
       }
     });
 
-    // Automatic display for first visit or when 10 hours have elapsed.
-    showAnnouncement(false);
+    // A login request takes priority over the 10-hour timer.
+    if (forceAfterLoad) {
+      forceAfterLoad = false;
+      showAnnouncement(true);
+    } else {
+      showAnnouncement(false);
+    }
   }
 
   // ==========================================
-  // SHOW AFTER EVERY SUCCESSFUL LOGIN
+  // PUBLIC FUNCTION: CALL AFTER SUCCESSFUL LOGIN
   // ==========================================
 
   window.nsShowAnnouncement = function () {
-    showAnnouncement(true);
+    console.log("[NS Announcement] Login display requested.");
+
+    const overlay = getOverlay();
+
+    if (overlay) {
+      showAnnouncement(true);
+    } else {
+      forceAfterLoad = true;
+
+      loadAnnouncement().then(function () {
+        if (forceAfterLoad && getOverlay()) {
+          forceAfterLoad = false;
+          showAnnouncement(true);
+        }
+      });
+    }
   };
 
-  async function loadAnnouncement() {
+  // ==========================================
+  // LOAD ANNOUNCEMENT HTML AND CSS
+  // ==========================================
+
+  function loadAnnouncement() {
     if (getOverlay()) {
       initializeAnnouncement();
-      return;
+      return Promise.resolve();
     }
 
-    try {
-      const response = await fetch(POPUP_URL, {
-        cache: "no-cache"
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          "Could not load announcement.html: " + response.status
-        );
-      }
-
-      const html = await response.text();
-      const template = document.createElement("template");
-
-      template.innerHTML = html;
-
-      // Add popup CSS to the page.
-      template.content.querySelectorAll("style").forEach(function (style) {
-        document.head.appendChild(style.cloneNode(true));
-      });
-
-      // Add the popup HTML to the page.
-      const overlay = template.content.querySelector(
-        "#nsAnnouncementOverlay"
-      );
-
-      if (!overlay) {
-        throw new Error(
-          "Announcement overlay was not found in announcement.html"
-        );
-      }
-
-      document.body.appendChild(overlay);
-
-      initializeAnnouncement();
-
-    } catch (error) {
-      console.error("NS Toolkits announcement failed to load:", error);
+    // Prevent multiple simultaneous fetches.
+    if (loadingPromise) {
+      return loadingPromise;
     }
+
+    loadingPromise = fetch(POPUP_URL, {
+      cache: "no-cache"
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error(
+            "Could not load announcement.html: HTTP " +
+            response.status
+          );
+        }
+
+        return response.text();
+      })
+      .then(function (html) {
+        const template = document.createElement("template");
+        template.innerHTML = html;
+
+        // Insert popup CSS into the current page.
+        template.content.querySelectorAll("style").forEach(
+          function (style) {
+            document.head.appendChild(style.cloneNode(true));
+          }
+        );
+
+        const overlay = template.content.querySelector(
+          "#nsAnnouncementOverlay"
+        );
+
+        if (!overlay) {
+          throw new Error(
+            "Could not find #nsAnnouncementOverlay in announcement.html"
+          );
+        }
+
+        document.body.appendChild(overlay);
+
+        initializeAnnouncement();
+
+        // Display if a login request arrived during loading.
+        if (forceAfterLoad) {
+          forceAfterLoad = false;
+          showAnnouncement(true);
+        }
+      })
+      .catch(function (error) {
+        console.error(
+          "[NS Announcement] Failed to load:",
+          error
+        );
+
+        // Allow another attempt later.
+        loadingPromise = null;
+      });
+
+    return loadingPromise;
   }
 
+  // Load after the page DOM is ready.
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadAnnouncement, {
-      once: true
-    });
+    document.addEventListener(
+      "DOMContentLoaded",
+      loadAnnouncement,
+      { once: true }
+    );
   } else {
     loadAnnouncement();
   }
