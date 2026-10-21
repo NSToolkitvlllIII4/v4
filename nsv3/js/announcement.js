@@ -129,6 +129,30 @@
   // ==========================================
 
   window.nsShowAnnouncement = function () {
+    // ==========================================
+// SHOW ANNOUNCEMENT AFTER SUCCESSFUL LOGIN
+// ==========================================
+
+function handleNSLoginSuccess() {
+  console.log("[NS Announcement] Login success detected.");
+
+  // Wait until the popup HTML is available.
+  if (typeof window.nsShowAnnouncement === "function") {
+    window.nsShowAnnouncement();
+  }
+}
+
+// Support the login event whether it is dispatched on
+// window or document.
+window.addEventListener(
+  "nsLoginSuccess",
+  handleNSLoginSuccess
+);
+
+document.addEventListener(
+  "nsLoginSuccess",
+  handleNSLoginSuccess
+);
     console.log("[NS Announcement] Login display requested.");
 
     const overlay = getOverlay();
