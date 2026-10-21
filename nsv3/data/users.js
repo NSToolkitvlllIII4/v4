@@ -137,6 +137,27 @@ window.NS_USERS = [
   //DayShift
   { username: "Lorenz1", pinHash: "1e12c1e01097cf3861ff603cd173c6b4376ee0a3e438ab7c92a7ae68a245dea8", team: "Day-Shift", role: "member" },
   { username: "AiraG1", pinHash: "04e729a9c402868a8c432e803ed75b7c3f9f16b798c8f3bd07a90bebd9a7dac9", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS1", pinHash: "a7fc04e4c6f7823a3ccbd1dd99a7300ded02962e8b259da67fe0af937903eed5", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS2", pinHash: "0c6dbdad91c6e340cc1b05f50806f2aba0cefe0e3a043337dd884db6df85a570", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS3", pinHash: "4693077dc29ca9fb03c64ac218ca2bee5fae8e1d2917eb2c8eed1917336380ed", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS4", pinHash: "2b169d27d9e55e10515caf1114f67aa60ad2c1021a1a43077fc05103b68013aa", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS5", pinHash: "477bcd0d2a1ad057fa85f018f13a8211891bc6fffd7fbce474ba81eb5d4322e5", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS6", pinHash: "36c8beae7821edb502c3abf33dddefa1842a765c4d1539310cc5a6a12c893d09", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS7", pinHash: "63780c958d017bb1581a1e7f88a34c80c45828e83176a8a40e8299983a3bfa92", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS8", pinHash: "42a81e17d89ae9e660ceaaef8a1def7abf3e1f2f5a5a7f623e18a7897b7ac5c0", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS9", pinHash: "0c5791cea66c4691968f61da566a3bf7c6e5020360c905ae8233488efa0b5162", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS10", pinHash: "508d030c81626ebe8bd8961bd75059dbe7c22ed798825c27885ec524ea0bb45a", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS11", pinHash: "498be034e73e6dd43aae93a5405db7c5aa412f627b2900a483411a5ec3fb0a2c", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS12", pinHash: "24975a89cbba02cb0b417ba53aa3c8bcc3e7c556ab592799a1bc3242574d51f2", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS13", pinHash: "60025bddd666bade2a76b480419c0ccbc3327827fe1ace4ac8e036b23a8ace62", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS14", pinHash: "b81d00e65f747a4161b56ab92f400b81862c2bbefe84f220fcefab0399081798", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS15", pinHash: "fcc687ca8d076689aa4a5877927b816cb3ccfd681fb666da9487dbb9d0f973a0", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS16", pinHash: "160878f5f2a7b3d85faa47b00e4d5ea886d1567dfc3d7be97c1cc3f034f7ba0a", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS17", pinHash: "e7307d066eaa94f6e5e28fd051f58a879acad95aec6ff8d8b73accffb1992859", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS18", pinHash: "26d72e99775e03d2501416c6f402c265e628b7d02eee17a7671563c32e0cd9a3", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS19", pinHash: "7c794a709302626ae0f7b3be4ed6da73f9d97d93e784773829d4328542f4f0f7", team: "Day-Shift", role: "member" },
+  { username: "NSToolkitsDS20", pinHash: "f87f6a02d81b2a4672944a22cb6beded0e0462e4b1d7216b6889cc2dbecce989", team: "Day-Shift", role: "member" },
+  
 
   // TeamFannie
   { username: "TeamFannie_01", pinHash: "e78f27ab3ef177a9926e6b90e572b9853ce6cf4d87512836e9ae85807ec9d7fe", team: "TeamFannie", role: "member" },
