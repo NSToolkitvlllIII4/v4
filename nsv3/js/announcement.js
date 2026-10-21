@@ -9,14 +9,19 @@
   const STORAGE_KEY = "nsAnnouncementLastShown";
   const TEN_HOURS = 10 * 60 * 60 * 1000;
 
-  const scriptElement = document.currentScript;
-  const scriptURL = scriptElement
-    ? scriptElement.src
-    : window.location.href;
+  // Resolve announcement.html relative to this JS file.
+  const currentScript =
+    document.currentScript ||
+    document.querySelector('script[src*="announcement.js"]');
+
+  if (!currentScript) {
+    console.error("[NS Announcement] announcement.js script tag not found.");
+    return;
+  }
 
   const POPUP_URL = new URL(
     "../announcement.html",
-    scriptURL
+    currentScript.src
   ).href;
 
   let initialized = false;
@@ -43,7 +48,6 @@
   function showAnnouncement(force) {
     const overlay = getOverlay();
 
-    // If the popup HTML has not loaded yet, queue the request.
     if (!overlay) {
       if (force) {
         forceAfterLoad = true;
@@ -57,25 +61,22 @@
     let lastShown = 0;
 
     try {
-      lastShown =
-        Number(localStorage.getItem(STORAGE_KEY)) || 0;
+      lastShown = Number(
+        localStorage.getItem(STORAGE_KEY)
+      ) || 0;
     } catch (error) {
-      console.warn("Announcement storage unavailable:", error);
+      console.warn("[NS Announcement] Storage unavailable:", error);
     }
 
     const now = Date.now();
 
-    if (
-      force ||
-      !lastShown ||
-      now - lastShown >= TEN_HOURS
-    ) {
+    if (force || !lastShown || now - lastShown >= TEN_HOURS) {
       overlay.classList.remove("ns-hidden");
 
       try {
         localStorage.setItem(STORAGE_KEY, String(now));
       } catch (error) {
-        console.warn("Could not save announcement time:", error);
+        console.warn("[NS Announcement] Could not save display time:", error);
       }
     }
   }
@@ -84,17 +85,11 @@
     if (initialized) return;
 
     const overlay = getOverlay();
-    const closeButton = document.getElementById(
-      "nsAnnouncementClose"
-    );
-    const okButton = document.getElementById(
-      "nsAnnouncementOk"
-    );
+    const closeButton = document.getElementById("nsAnnouncementClose");
+    const okButton = document.getElementById("nsAnnouncementOk");
 
     if (!overlay || !closeButton || !okButton) {
-      console.error(
-        "Announcement initialization failed: required popup elements are missing."
-      );
+      console.error("[NS Announcement] Popup elements are missing.");
       return;
     }
 
@@ -115,7 +110,7 @@
       }
     });
 
-    // A login request takes priority over the 10-hour timer.
+    // Login-triggered display takes priority.
     if (forceAfterLoad) {
       forceAfterLoad = false;
       showAnnouncement(true);
@@ -129,47 +124,30 @@
   // ==========================================
 
   window.nsShowAnnouncement = function () {
-    // ==========================================
-// SHOW ANNOUNCEMENT AFTER SUCCESSFUL LOGIN
-// ==========================================
+    console.log("[NS Announcement] Display requested.");
 
-function handleNSLoginSuccess() {
-  console.log("[NS Announcement] Login success detected.");
+    if (getOverlay()) {
+      showAnnouncement(true);
+      return;
+    }
 
-  // Wait until the popup HTML is available.
-  if (typeof window.nsShowAnnouncement === "function") {
+    forceAfterLoad = true;
+
+    loadAnnouncement();
+  };
+
+  // ==========================================
+  // LOGIN SUCCESS EVENT LISTENERS
+  // These must be OUTSIDE nsShowAnnouncement().
+  // ==========================================
+
+  function handleLoginSuccess() {
+    console.log("[NS Announcement] Login success event received.");
     window.nsShowAnnouncement();
   }
-}
 
-// Support the login event whether it is dispatched on
-// window or document.
-window.addEventListener(
-  "nsLoginSuccess",
-  handleNSLoginSuccess
-);
-
-document.addEventListener(
-  "nsLoginSuccess",
-  handleNSLoginSuccess
-);
-    console.log("[NS Announcement] Login display requested.");
-
-    const overlay = getOverlay();
-
-    if (overlay) {
-      showAnnouncement(true);
-    } else {
-      forceAfterLoad = true;
-
-      loadAnnouncement().then(function () {
-        if (forceAfterLoad && getOverlay()) {
-          forceAfterLoad = false;
-          showAnnouncement(true);
-        }
-      });
-    }
-  };
+  window.addEventListener("nsLoginSuccess", handleLoginSuccess);
+  document.addEventListener("nsLoginSuccess", handleLoginSuccess);
 
   // ==========================================
   // LOAD ANNOUNCEMENT HTML AND CSS
@@ -181,7 +159,6 @@ document.addEventListener(
       return Promise.resolve();
     }
 
-    // Prevent multiple simultaneous fetches.
     if (loadingPromise) {
       return loadingPromise;
     }
@@ -192,8 +169,8 @@ document.addEventListener(
       .then(function (response) {
         if (!response.ok) {
           throw new Error(
-            "Could not load announcement.html: HTTP " +
-            response.status
+            "announcement.html returned HTTP " + response.status +
+            ". URL: " + POPUP_URL
           );
         }
 
@@ -203,12 +180,10 @@ document.addEventListener(
         const template = document.createElement("template");
         template.innerHTML = html;
 
-        // Insert popup CSS into the current page.
-        template.content.querySelectorAll("style").forEach(
-          function (style) {
-            document.head.appendChild(style.cloneNode(true));
-          }
-        );
+        // Add popup styles to the document.
+        template.content.querySelectorAll("style").forEach(function (style) {
+          document.head.appendChild(style.cloneNode(true));
+        });
 
         const overlay = template.content.querySelector(
           "#nsAnnouncementOverlay"
@@ -216,7 +191,7 @@ document.addEventListener(
 
         if (!overlay) {
           throw new Error(
-            "Could not find #nsAnnouncementOverlay in announcement.html"
+            "Could not find #nsAnnouncementOverlay in " + POPUP_URL
           );
         }
 
@@ -224,32 +199,25 @@ document.addEventListener(
 
         initializeAnnouncement();
 
-        // Display if a login request arrived during loading.
+        // Show if login was requested while loading.
         if (forceAfterLoad) {
           forceAfterLoad = false;
           showAnnouncement(true);
         }
       })
       .catch(function (error) {
-        console.error(
-          "[NS Announcement] Failed to load:",
-          error
-        );
-
-        // Allow another attempt later.
+        console.error("[NS Announcement] Failed to load:", error);
         loadingPromise = null;
       });
 
     return loadingPromise;
   }
 
-  // Load after the page DOM is ready.
+  // Load the popup when the page is ready.
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      loadAnnouncement,
-      { once: true }
-    );
+    document.addEventListener("DOMContentLoaded", loadAnnouncement, {
+      once: true
+    });
   } else {
     loadAnnouncement();
   }
