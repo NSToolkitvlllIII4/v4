@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NS Excellence xString</title>
+ <link rel="icon" type="image/jpg" href="https://i.imgur.com/QWLMgK8.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    :root {
+        --ink: #FFFFFF;
+        --signal: #F6C90E;
+        --paper: #0B0B0B;
+        --card: rgba(255,255,255,0.05);
+        --slate: #B8B8B8;
+        --line: rgba(255,255,255,0.12);
+        --social: #F6C90E;
+        --visual: #C2410C;
+        --pro: #0F766E;
+        --sans: 'Inter', system-ui, -apple-system, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        background: radial-gradient(circle at top, #1a1a1a 0%, #0b0b0b 60%);
+        font-family: var(--sans);
+        color: var(--ink);
+        min-height: 100vh;
+    }
+    a { color: inherit; }
+
+    /* ---------- top bar ---------- */
+    .top-bar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 28px;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+    }
+    .top-bar img { height: 34px; width: auto; }
+    .top-bar-text h1 {
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        margin: 0;
+        color: var(--ink);
+    }
+    .top-bar-text p {
+        margin: 2px 0 0;
+        font-size: 12.5px;
+        color: var(--slate);
+    }
+
+    /* ---------- shell ---------- */
+    .shell {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        align-items: start;
+        min-height: calc(100vh - 67px);
+    }
+    @media (max-width: 900px) {
+        .shell { grid-template-columns: 1fr; }
+        .sidebar { position: static !important; max-height: none !important; border-right: none; border-bottom: 1px solid var(--line); }
+    }
+
+    /* ---------- sidebar (subject form) ---------- */
+    .sidebar {
+        position: sticky;
+        top: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+        background: var(--card);
+        border-right: 1px solid var(--line);
+        padding: 24px 22px 0;
+    }
+    .field-section { margin-bottom: 22px; }
+    .field-section h3 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--slate);
+        margin: 0 0 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--line);
+    }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink);
+        letter-spacing: 0.3px;
+        margin-bottom: 5px;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .field input[type="text"],
+    .field input[type="date"],
+    .field input[type="tel"] {
+        width: 100%;
+        padding: 9px 11px;
+        border: 1.5px solid var(--line);
+        border-radius: 7px;
+        font-size: 0.88rem;
+        font-family: var(--sans);
+        outline: none;
+        background: var(--paper);
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .field input:focus {
+        border-color: var(--signal);
+        background: var(--card);
+    }
+
+    .dynamic-row { display: flex; gap: 6px; margin-bottom: 6px; }
+    .dynamic-row input { flex: 1; }
+    .location-row { display: flex; gap: 6px; margin-bottom: 6px; }
+
+    .date-text-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 9px 10px;
+        border: 1.5px solid var(--line);
+        border-radius: 7px;
+        font-size: 0.88rem;
+        font-family: var(--sans);
+        background: var(--paper);
+        outline: none;
+    }
+    .date-text-input:focus { border-color: var(--signal); }
+    .date-hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--slate); }
+    .dol-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+    .dol-row .date-text-input { flex: 1; }
+
+    .alias-row {
+        border: 1.5px solid var(--line);
+        border-radius: 7px;
+        padding: 7px 8px;
+        margin-bottom: 6px;
+        background: var(--paper);
+    }
+    .alias-row-top { display: flex; gap: 6px; margin-bottom: 6px; }
+    .alias-row-top input { flex: 1; }
+    .alias-type-toggle { display: flex; gap: 16px; font-size: 0.76rem; color: var(--ink); }
+    .alias-type-toggle label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 600; }
+    .alias-type-toggle input[type="radio"] { cursor: pointer; margin: 0; }
+
+    .variant-list {
+        border: 1.5px solid var(--line);
+        border-radius: 7px;
+        background: var(--paper);
+        max-height: 190px;
+        overflow-y: auto;
+        padding: 4px 6px;
+    }
+    .variant-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 4px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--line);
+    }
+    .variant-row:last-child { border-bottom: none; }
+    .variant-row input[type="checkbox"] { flex-shrink: 0; cursor: pointer; }
+    .variant-row span { word-break: break-word; }
+    .variant-row.unchecked span { color: var(--slate); text-decoration: line-through; }
+    .variant-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 6px;
+    }
+    .variant-actions button {
+        border: none;
+        background: none;
+        color: var(--signal);
+        font-weight: 700;
+        font-size: 0.75rem;
+        cursor: pointer;
+        padding: 0;
+    }
+    .variant-actions button:hover { text-decoration: underline; }
+
+    .icon-btn {
+        border: 1.5px solid var(--line);
+        background: var(--paper);
+        border-radius: 7px;
+        width: 34px;
+        flex-shrink: 0;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #C0392B;
+    }
+    .icon-btn:hover { background: #FBEAEA; }
+
+    .add-link {
+        border: none;
+        background: none;
+        color: var(--signal);
+        font-weight: 700;
+        font-size: 0.78rem;
+        cursor: pointer;
+        padding: 2px 0;
+    }
+    .add-link:hover { text-decoration: underline; }
+
+    .sidebar-actions {
+        position: sticky;
+        bottom: 0;
+        background: var(--card);
+        padding: 14px 0 20px;
+        margin-top: 6px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        gap: 10px;
+    }
+    .btn {
+        flex: 1;
+        padding: 11px 16px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1.5px solid var(--signal);
+        border-radius: 8px;
+        background: var(--card);
+        color: var(--signal);
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn.primary { background: var(--signal); color: white; }
+    .btn:hover { background: var(--signal); color: white; }
+    .btn.primary:hover { background: #1B3FC4; border-color: #1B3FC4; }
+
+    /* ---------- main canvas ---------- */
+    .main { padding: 24px 28px 60px; min-width: 0; }
+    .main h2 {
+        font-size: 15px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .main .lede {
+        font-size: 12.5px;
+        color: var(--slate);
+        margin: 0 0 18px;
+    }
+
+    .empty-state {
+        border: 1.5px dashed var(--line);
+        border-radius: 12px;
+        padding: 44px 20px;
+        text-align: center;
+        color: var(--slate);
+        font-size: 13.5px;
+        background: var(--card);
+    }
+    .empty-state strong { color: var(--ink); display: block; margin-bottom: 6px; font-size: 14px; }
+
+    /* platform icon row */
+    .action-bar {
+        position: sticky;
+        top: 0;
+        background: var(--paper);
+        padding: 4px 0 14px;
+        z-index: 5;
+    }
+    .platform-icon-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .platform-icon-btn {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        border: 1.5px solid var(--line);
+        background: var(--card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        transition: border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+    .platform-icon-btn:hover {
+        border-color: var(--signal);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(36, 82, 232, 0.15);
+    }
+    .platform-icon-btn img { width: 22px; height: 22px; object-fit: contain; }
+    .platform-icon-fallback {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--slate);
+        letter-spacing: 0.02em;
+    }
+
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .filter-row input {
+        flex: 1;
+        padding: 9px 13px;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        font-size: 0.83rem;
+        font-family: var(--sans);
+        background: var(--card);
+        outline: none;
+    }
+    .filter-row input:focus { border-color: var(--signal); }
+    .expand-toggle {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--signal);
+        background: none;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .expand-toggle:hover { text-decoration: underline; }
+    .export-btn {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: white;
+        background: var(--signal);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .export-btn:hover { opacity: 0.88; }
+
+    #copyToast {
+        position: fixed;
+        bottom: 26px;
+        left: 50%;
+        transform: translateX(-50%) translateY(16px);
+        background: var(--ink);
+        color: #fff;
+        padding: 11px 20px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        z-index: 9999;
+        box-shadow: 0 8px 22px rgba(20, 33, 61, 0.28);
+    }
+    #copyToast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    #lockedBanner {
+        background: #FFF4E0;
+        color: #7A4E00;
+        border-bottom: 2px solid #F0B429;
+        padding: 10px 20px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-align: center;
+        letter-spacing: 0.01em;
+    }
+    .locked input, .locked select, .locked textarea {
+        background: #ECEEF2 !important;
+        color: var(--slate) !important;
+        cursor: not-allowed;
+        opacity: 0.85;
+    }
+    .locked .add-link,
+    .locked .icon-btn,
+    .locked #clearGenBtn,
+    .locked #loadStateBtn {
+        display: none !important;
+    }
+
+    /* result groups */
+    .result-group {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: var(--card);
+        overflow: hidden;
+    }
+    .result-group summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 700;
+        font-size: 12.5px;
+    }
+    .result-group summary::-webkit-details-marker { display: none; }
+    .result-group summary .count { font-weight: 600; font-size: 11.5px; color: var(--slate); }
+    .result-group .rows { border-top: 1px solid var(--line); }
+    .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 16px;
+        border-bottom: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 12px;
+    }
+    .row:last-child { border-bottom: none; }
+    .row a { text-decoration: none; word-break: break-word; }
+    .row a:hover { color: var(--signal); text-decoration: underline; }
+    .row.hidden { display: none; }
+    .row button.copy-mini {
+        flex-shrink: 0;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        font-family: var(--sans);
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--slate);
+    }
+    .row button.copy-mini:hover { background: var(--signal); color: white; border-color: var(--signal); }
+
+    .no-matches {
+        font-size: 12.5px;
+        color: var(--slate);
+        padding: 14px 16px;
+        display: none;
+    }
+
+
+    /* NS Toolkits v3 shared navigation; isolated from generator behavior */
+    .navbar {
+        width: 100%;
+        background: rgba(20, 20, 20, 0.72);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(246, 201, 14, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    .nav-inner {
+        position: relative;
+        max-width: 1100px;
+        min-height: 58px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    .nav-left { flex: 0 0 auto; z-index: 1; }
+    .nav-left h1 {
+        margin: 0;
+        font-size: 20px;
+        color: #f6c90e;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+    }
+    .nav-menu a {
+        color: #e6e6e6;
+        text-decoration: none;
+        font-size: 14px;
+        opacity: .85;
+        transition: color .2s ease, opacity .2s ease;
+    }
+    .nav-menu a:hover, .nav-menu a.active { color: #f6c90e; opacity: 1; }
+
+    /* Dark theme for the existing Search String Generator UI */
+    .sidebar { background: rgba(16,16,16,0.96); border-color: var(--line); }
+    .main { color: #fff; }
+    .field input[type="text"], .field input[type="date"], .field input[type="tel"],
+    .date-text-input, .alias-row, .variant-list, .icon-btn,
+    .filter-row input, .row button.copy-mini {
+        background: rgba(255,255,255,0.045);
+        color: #fff;
+        border-color: rgba(255,255,255,0.16);
+    }
+    .field input::placeholder, .date-text-input::placeholder, .filter-row input::placeholder,
+    .dynamic-row input::placeholder, .location-row input::placeholder { color: #8f8f8f; }
+    .field input:focus, .date-text-input:focus, .filter-row input:focus {
+        background: rgba(255,255,255,0.08);
+        border-color: #f6c90e;
+    }
+    .field label, .field-section h3, .main h2 { color: #f3f3f3; }
+    .field-section h3 { border-bottom-color: var(--line); }
+    .variant-row { border-bottom-color: var(--line); }
+    .variant-row.unchecked span, .main .lede, .result-group summary .count,
+    .row button.copy-mini { color: #b8b8b8; }
+    .sidebar-actions { background: #101010; border-top-color: var(--line); }
+    .btn { background: rgba(255,255,255,0.04); color: #f6c90e; border-color: #f6c90e; }
+    .btn.primary { background: #f6c90e; color: #111; }
+    .btn:hover { background: #f6c90e; color: #111; }
+    .btn.primary:hover { background: #d4a800; border-color: #d4a800; }
+    .empty-state, .result-group { background: rgba(255,255,255,0.04); border-color: var(--line); color: #b8b8b8; }
+    .empty-state strong { color: #fff; }
+    .action-bar { background: #0b0b0b; }
+    .platform-icon-btn { background: rgba(255,255,255,0.05); border-color: var(--line); }
+    .platform-icon-btn:hover { border-color: #f6c90e; box-shadow: 0 4px 10px rgba(246,201,14,0.12); }
+    .result-group summary { color: #fff; }
+    .result-group .rows, .row { border-color: var(--line); }
+    .row a:hover { color: #f6c90e; }
+    .row button.copy-mini:hover { background: #f6c90e; color: #111; border-color: #f6c90e; }
+    .export-btn { background: #f6c90e; color: #111; }
+    .site-footer {
+        padding: 20px;
+        background: rgba(20,20,20,0.92);
+        color: #bdbdbd;
+        text-align: center;
+        font-size: 13px;
+        margin-top: 28px;
+        border-top: 1px solid rgba(246,201,14,0.12);
+    }
+    @media (max-width: 768px) {
+        .nav-inner { padding: 12px 16px; flex-wrap: wrap; }
+        .nav-menu { position: static; transform: none; margin-left: auto; gap: 14px; flex-wrap: wrap; }
+        .nav-menu a { font-size: 12px; }
+        .nav-left h1 { font-size: 16px; }
+    }
+    @media (max-width: 540px) {
+        .nav-inner { align-items: flex-start; flex-direction: column; gap: 10px; }
+        .nav-menu { margin-left: 0; gap: 16px; }
+    }
+
+
+
+    /* Final dark-theme pass: remove remaining light surfaces without changing behavior */
+    #copyToast {
+        background: #181818;
+        color: #F6C90E;
+        border: 1px solid rgba(246,201,14,0.45);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+    }
+    #lockedBanner {
+        background: #211b08;
+        color: #F6C90E;
+        border-bottom: 1px solid rgba(246,201,14,0.55);
+    }
+    .locked input, .locked select, .locked textarea {
+        background: #202020 !important;
+        color: #929292 !important;
+        border-color: rgba(255,255,255,0.10) !important;
+        cursor: not-allowed;
+        opacity: 1;
+    }
+    .icon-btn:hover {
+        background: #302020;
+        border-color: rgba(255,110,110,0.45);
+        color: #ff8585;
+    }
+    .btn.primary { color: #111111; }
+    .btn.primary:hover { background: #d4a800; border-color: #d4a800; color: #111111; }
+    .export-btn { color: #111111; }
+    .field input, .date-text-input, .filter-row input,
+    .dynamic-row input, .location-row input, .alias-row input,
+    select, textarea {
+        color: #f5f5f5;
+        caret-color: #F6C90E;
+        color-scheme: dark;
+    }
+    input[type="date"] { color-scheme: dark; }
+    input:disabled, select:disabled, textarea:disabled {
+        background-color: #202020 !important;
+        color: #888888 !important;
+    }
+
+    /* Platform icon buttons: match dark theme */
+    .platform-icon-btn {
+        background: #151515;
+        border: 1.5px solid rgba(255,255,255,0.14);
+    }
+    .platform-icon-btn:hover {
+        background: #1d1d1d;
+        border-color: #F6C90E;
+        box-shadow: 0 4px 12px rgba(246,201,14,0.18);
+    }
+
+    /* Icons keep their brand colors (set per platform in PLATFORM_LIST).
+       Dark buttons keep every logo readable, including X, TikTok and Tumblr. */
+    .platform-icon-btn img {
+        opacity: 0.95;
+        transition: opacity .15s ease, transform .15s ease;
+    }
+    .platform-icon-btn:hover img { opacity: 1; transform: scale(1.08); }
+    .platform-icon-fallback { font-weight: 800; }
+
+</style>
+</head>
+<body>
+
+<nav class="navbar" aria-label="Main navigation">
+    <div class="nav-inner">
+        <div class="nav-left">
+            <a href="https://nstoolkits.site/nsv3/" style="text-decoration:none;color:inherit">
+                <h1>NS Toolkits v3</h1>
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="https://nstoolkits.site/nsv3/">Home</a>
+            <a href="https://nstoolkits.site/nsv3/about.html">About Us</a>
+            <a href="https://nstoolkits.site/nsv3/download.html">Download</a>
+        </div>
+    </div>
+</nav>
+
+
+
+<div class="shell">
+    <!-- ================= SIDEBAR: SUBJECT FORM ================= -->
+    <aside class="sidebar">
+        <div class="field-section">
+            <h3>Identity</h3>
+            <div class="field">
+                <label for="fullName">Full name</label>
+                <input type="text" id="fullName" placeholder="e.g. Jordan Alex Rivera">
+            </div>
+            <div class="field" id="nameVariantField" style="display:none;">
+                <label>Name combinations <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--slate);">— uncheck any to exclude</span></label>
+                <div id="nameVariantList" class="variant-list"></div>
+            </div>
+            <div class="field">
+                <label>Date of birth <span class="date-hint">— paste as MM/DD/YYYY; use XX or XXXX for an unknown part</span></label>
+                <input type="text" id="dobDate" placeholder="MM/DD/YYYY" class="date-text-input">
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h3>Date(s) of Loss</h3>
+            <div class="field">
+                <div id="dolRows"></div>
+                <button type="button" class="add-link" id="addDol">+ Add another date of loss</button>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h3>Location</h3>
+            <div class="field">
+                <div id="locationRows"></div>
+                <button type="button" class="add-link" id="addLocation">+ Add another city / state</button>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h3>Contact</h3>
+            <div class="field">
+                <label>Phone number(s)</label>
+                <div id="phoneRows"></div>
+                <button type="button" class="add-link" id="addPhone">+ Add another phone number</button>
+            </div>
+            <div class="field">
+                <label>Email address(es)</label>
+                <div id="emailRows"></div>
+                <button type="button" class="add-link" id="addEmail">+ Add another email</button>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h3>Alias / Nickname</h3>
+            <div class="field">
+                <div id="aliasRows"></div>
+                <button type="button" class="add-link" id="addAlias">+ Add another alias / nickname</button>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <h3>Background</h3>
+            <div class="field">
+                <label>Employment</label>
+                <div id="employmentRows"></div>
+                <button type="button" class="add-link" id="addEmployment">+ Add another employer</button>
+            </div>
+            <div class="field">
+                <label>School</label>
+                <div id="schoolRows"></div>
+                <button type="button" class="add-link" id="addSchool">+ Add another school</button>
+            </div>
+        </div>
+
+        <div class="sidebar-actions">
+            <button class="btn primary" id="generateBtn">Generate</button>
+            <button class="btn" id="clearGenBtn">Clear</button>
+        </div>
+        <div class="sidebar-actions" style="margin-top: 8px;">
+            <button class="btn" id="saveStateBtn">Save to file</button>
+            <button class="btn" id="loadStateBtn">Load from file</button>
+            <input type="file" id="loadStateInput" accept=".html,.htm,.json,text/html,application/json" style="display:none;">
+        </div>
+    </aside>
+
+    <!-- ================= MAIN: RESULTS ================= -->
+    <main class="main">
+        <h2>Search strings</h2>
+        <p class="lede">Fill in the subject panel and generate. Blank fields are skipped automatically.</p>
+        <div id="results"></div>
+    </main>
+</div>
+
+
+<script>
+const ORIGINAL_DOCUMENT_HTML = document.documentElement.outerHTML;
+
+/* =========================================================
+   PLATFORM DEFINITIONS
+   ========================================================= */
+
+const PLATFORM_LIST = [
+    { label: 'Facebook', key: 'Facebook', group: 'full', slug: 'facebook', color: '1877F2' },
+    { label: 'Instagram', key: 'Instagram', group: 'groupB', slug: 'instagram', color: 'E4405F' },
+    { label: 'Twitter / X', key: 'X / Twitter', group: 'full', slug: 'x', color: 'FFFFFF' },
+    { label: 'YouTube', key: 'YouTube', group: 'full', slug: 'youtube', color: 'FF0000' },
+    { label: 'LinkedIn', key: 'LinkedIn', group: 'groupC', slug: 'linkedin', color: '4A9BE8' },
+    { label: 'TikTok', key: 'TikTok', group: 'groupB', slug: 'tiktok', color: 'FFFFFF' },
+    { label: 'Pinterest', key: 'Pinterest', group: 'groupB', slug: 'pinterest', color: 'E60023' },
+    { label: 'Strava', key: 'Strava', group: 'groupB', slug: 'strava', color: 'FC4C02' },
+    { label: 'Foursquare', key: 'Foursquare', group: 'groupB', slug: 'foursquare', color: '6B7BFF' },
+    { label: 'Tumblr', key: 'Tumblr', group: 'groupB', slug: 'tumblr', color: '6C88AA' },
+    { label: 'Google', key: 'Google', group: 'full', slug: 'google', color: '4285F4' },
+    { label: 'RocketReach', key: 'RocketReach', group: 'groupC', slug: 'rocketreach', color: '4C8DFF' },
+    { label: 'SignalHire', key: 'SignalHire', group: 'groupC', slug: 'signalhire', color: '2BB673' }
+];
+
+const CATEGORY_ORDER = [
+    'Name & Aliases',
+    'Name + Location',
+    'Employer & School',
+    'Birthday',
+    'Date of Loss',
+    'Phone',
+    'Email & Username'
+];
+
+/* =========================================================
+   DYNAMIC FORM ROWS
+   ========================================================= */
+
+function addDynamicRow(container, buildRowFn) {
+    container.appendChild(buildRowFn());
+}
+
+function makeRemovableInput(placeholder, inputType, extraClass) {
+    const row = document.createElement('div');
+    row.className = 'dynamic-row';
+    const input = document.createElement('input');
+    input.type = inputType || 'text';
+    input.placeholder = placeholder;
+    input.className = extraClass;
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'icon-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => row.remove());
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    return row;
+}
+
+function makeLocationRow() {
+    const row = document.createElement('div');
+    row.className = 'location-row';
+    const city = document.createElement('input');
+    city.type = 'text';
+    city.placeholder = 'City';
+    city.className = 'city-input';
+    const state = document.createElement('input');
+    state.type = 'text';
+    state.placeholder = 'State';
+    state.className = 'state-input';
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'icon-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => row.remove());
+    row.appendChild(city);
+    row.appendChild(state);
+    row.appendChild(removeBtn);
+    return row;
+}
+
+function makeDolRow() {
+    const row = document.createElement('div');
+    row.className = 'dol-row';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'MM/DD/YYYY';
+    input.className = 'date-text-input dol-date';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'icon-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => row.remove());
+
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    return row;
+}
+
+let aliasRowCounter = 0;
+function makeAliasRow() {
+    const groupName = 'aliasType' + (aliasRowCounter++);
+    const row = document.createElement('div');
+    row.className = 'alias-row';
+
+    const top = document.createElement('div');
+    top.className = 'alias-row-top';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Alias / nickname / username';
+    input.className = 'alias-input';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'icon-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => row.remove());
+
+    top.appendChild(input);
+    top.appendChild(removeBtn);
+
+    const toggle = document.createElement('div');
+    toggle.className = 'alias-type-toggle';
+
+    const aliasLabel = document.createElement('label');
+    const aliasRadio = document.createElement('input');
+    aliasRadio.type = 'radio';
+    aliasRadio.name = groupName;
+    aliasRadio.value = 'alias';
+    aliasRadio.checked = true;
+    aliasRadio.className = 'alias-type-radio';
+    aliasLabel.appendChild(aliasRadio);
+    aliasLabel.appendChild(document.createTextNode(' Alias'));
+
+    const usernameLabel = document.createElement('label');
+    const usernameRadio = document.createElement('input');
+    usernameRadio.type = 'radio';
+    usernameRadio.name = groupName;
+    usernameRadio.value = 'username';
+    usernameRadio.className = 'alias-type-radio';
+    usernameLabel.appendChild(usernameRadio);
+    usernameLabel.appendChild(document.createTextNode(' Username'));
+
+    toggle.appendChild(aliasLabel);
+    toggle.appendChild(usernameLabel);
+
+    row.appendChild(top);
+    row.appendChild(toggle);
+    return row;
+}
+
+const locationRows = document.getElementById('locationRows');
+const phoneRows = document.getElementById('phoneRows');
+const aliasRows = document.getElementById('aliasRows');
+const emailRows = document.getElementById('emailRows');
+const employmentRows = document.getElementById('employmentRows');
+const schoolRows = document.getElementById('schoolRows');
+const dolRows = document.getElementById('dolRows');
+
+document.getElementById('addLocation').addEventListener('click', () => addDynamicRow(locationRows, makeLocationRow));
+document.getElementById('addPhone').addEventListener('click', () => addDynamicRow(phoneRows, () => makeRemovableInput('Phone number', 'tel', 'phone-input')));
+document.getElementById('addAlias').addEventListener('click', () => addDynamicRow(aliasRows, makeAliasRow));
+document.getElementById('addEmail').addEventListener('click', () => addDynamicRow(emailRows, () => makeRemovableInput('Email address', 'text', 'email-input')));
+document.getElementById('addEmployment').addEventListener('click', () => addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input')));
+document.getElementById('addSchool').addEventListener('click', () => addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input')));
+document.getElementById('addDol').addEventListener('click', () => addDynamicRow(dolRows, makeDolRow));
+
+addDynamicRow(locationRows, makeLocationRow);
+addDynamicRow(phoneRows, () => makeRemovableInput('Phone number', 'tel', 'phone-input'));
+addDynamicRow(aliasRows, makeAliasRow);
+addDynamicRow(emailRows, () => makeRemovableInput('Email address', 'text', 'email-input'));
+addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input'));
+addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input'));
+addDynamicRow(dolRows, makeDolRow);
+
+/* =========================================================
+   NAME COMBINATION PICKER
+   ========================================================= */
+
+const fullNameInput = document.getElementById('fullName');
+const nameVariantField = document.getElementById('nameVariantField');
+const nameVariantList = document.getElementById('nameVariantList');
+
+function renderNameVariantPreview() {
+    const val = fullNameInput.value.trim();
+    nameVariantList.innerHTML = '';
+    const oldActions = nameVariantField.querySelector('.variant-actions');
+    if (oldActions) oldActions.remove();
+
+    if (!val) { nameVariantField.style.display = 'none'; return; }
+
+    const variants = nameVariants(val);
+    if (variants.length <= 1) { nameVariantField.style.display = 'none'; return; }
+
+    nameVariantField.style.display = '';
+
+    variants.forEach(v => {
+        const row = document.createElement('label');
+        row.className = 'variant-row';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = true;
+        cb.className = 'name-variant-checkbox';
+        cb.value = v;
+        cb.addEventListener('change', () => row.classList.toggle('unchecked', !cb.checked));
+
+        const span = document.createElement('span');
+        span.textContent = v;
+
+        row.appendChild(cb);
+        row.appendChild(span);
+        nameVariantList.appendChild(row);
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'variant-actions';
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.textContent = 'Select all';
+    allBtn.addEventListener('click', () => {
+        nameVariantList.querySelectorAll('.name-variant-checkbox').forEach(cb => {
+            cb.checked = true;
+            cb.closest('.variant-row').classList.remove('unchecked');
+        });
+    });
+    const noneBtn = document.createElement('button');
+    noneBtn.type = 'button';
+    noneBtn.textContent = 'Select none';
+    noneBtn.addEventListener('click', () => {
+        nameVariantList.querySelectorAll('.name-variant-checkbox').forEach(cb => {
+            cb.checked = false;
+            cb.closest('.variant-row').classList.add('unchecked');
+        });
+    });
+    actions.appendChild(allBtn);
+    actions.appendChild(noneBtn);
+    nameVariantField.appendChild(actions);
+}
+
+fullNameInput.addEventListener('input', renderNameVariantPreview);
+
+/* =========================================================
+   QUERY GENERATION
+   ========================================================= */
+
+function formatPhone(raw) {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) return `+1-${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    if (digits.length === 11 && digits.startsWith('1')) return `+1-${digits.slice(1,4)}-${digits.slice(4,7)}-${digits.slice(7)}`;
+    return raw.trim();
+}
+
+function combinationsOfSize(arr, size) {
+    const result = [];
+    const helper = (start, combo) => {
+        if (combo.length === size) { result.push(combo.slice()); return; }
+        for (let i = start; i < arr.length; i++) {
+            combo.push(arr[i]);
+            helper(i + 1, combo);
+            combo.pop();
+        }
+    };
+    helper(0, []);
+    return result;
+}
+
+function nameVariants(fullName) {
+    const trimmed = fullName.trim();
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    const n = parts.length;
+    const variants = [trimmed];
+    const idx = i => parts[i - 1];
+
+    if (n === 3) {
+        const FN = idx(1), MN = idx(2), LN = idx(3);
+        variants.push(`${FN} ${LN}`, `${MN} ${LN}`, `${FN} ${MN}`);
+    } else if (n === 4) {
+        const FN = idx(1), SN = idx(2), MN = idx(3), LN = idx(4);
+        variants.push(
+            `${FN} ${MN} ${LN}`, `${SN} ${MN} ${LN}`, `${FN} ${LN}`,
+            `${FN} ${MN}`, `${SN} ${MN}`, `${FN} ${SN}`, `${SN} ${LN}`,
+            `${FN} ${SN} ${LN}`, `${MN} ${LN}`, `${FN} ${SN} ${MN}`
+        );
+    } else if (n === 5) {
+        const FN = idx(1), SN = idx(2), TN = idx(3), MN = idx(4), LN = idx(5);
+        variants.push(
+            `${FN} ${LN}`, `${FN} ${MN}`, `${FN} ${TN}`, `${FN} ${SN}`, `${FN} ${SN} ${TN}`,
+            `${SN} ${TN}`, `${SN} ${MN}`, `${SN} ${LN}`, `${TN} ${MN}`, `${TN} ${LN}`,
+            `${FN} ${SN} ${MN}`, `${FN} ${SN} ${LN}`, `${FN} ${TN} ${MN}`, `${FN} ${TN} ${LN}`,
+            `${FN} ${MN} ${LN}`, `${SN} ${MN} ${LN}`, `${TN} ${MN} ${LN}`, `${SN} ${TN} ${MN}`,
+            `${SN} ${TN} ${LN}`, `${SN} ${TN} ${MN} ${LN}`, `${FN} ${SN} ${MN} ${LN}`, `${FN} ${TN} ${MN} ${LN}`,
+            `${FN} ${SN} ${TN} ${LN}`, `${MN} ${LN}`, `${FN} ${SN} ${TN} ${MN}`
+        );
+    } else if (n === 6) {
+        for (let size = 2; size <= 5; size++) {
+            combinationsOfSize(parts, size).forEach(combo => variants.push(combo.join(' ')));
+        }
+    }
+
+    const seen = new Set();
+    return variants.filter(v => {
+        const key = v.trim().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function dedupe(arr) {
+    const seen = new Set();
+    return arr.filter(s => {
+        const key = s.trim().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dob, dateOfLossList }) {
+    const cleanLocations = locations.filter(l => l.city || l.state);
+    const identifiers = [...nameVariantsList, ...aliases.filter(Boolean)];
+    const usernames = [
+        ...emails.filter(Boolean).map(e => e.split('@')[0].trim()).filter(Boolean),
+        ...aliasUsernames.filter(Boolean)
+    ];
+
+    const full = [];
+    const display = {};
+    CATEGORY_ORDER.forEach(c => display[c] = []);
+    const pushBoth = (category, text) => { full.push(text); display[category].push(text); };
+
+    identifiers.forEach(id => {
+        pushBoth('Name & Aliases', id);
+
+        cleanLocations.forEach(loc => {
+            if (loc.city) pushBoth('Name + Location', `${id}, ${loc.city}`);
+            if (loc.state) pushBoth('Name + Location', `${id}, ${loc.state}`);
+            if (loc.city && loc.state) pushBoth('Name + Location', `${id}, ${loc.city}, ${loc.state}`);
+        });
+
+        employers.filter(Boolean).forEach(emp => pushBoth('Employer & School', `${id}, ${emp}`));
+        schools.filter(Boolean).forEach(sch => pushBoth('Employer & School', `${id}, ${sch}`));
+
+        if (dob) {
+            pushBoth('Birthday', `${id}, Birthday`);
+            if (dob.short) pushBoth('Birthday', `${id}, ${dob.short}`);
+            pushBoth('Birthday', `${id}, ${dob.full}`);
+        }
+
+        dateOfLossList.forEach(dol => {
+            pushBoth('Date of Loss', `${id}, ${dol.full}`);
+            cleanLocations.forEach(loc => {
+                if (loc.city) pushBoth('Date of Loss', `${id}, ${loc.city}, ${dol.full}`);
+                if (loc.state) pushBoth('Date of Loss', `${id}, ${loc.state}, ${dol.full}`);
+                if (loc.city && loc.state) pushBoth('Date of Loss', `${id}, ${loc.city}, ${loc.state}, ${dol.full}`);
+            });
+        });
+    });
+
+    phones.filter(Boolean).forEach(p => pushBoth('Phone', formatPhone(p)));
+    emails.filter(Boolean).forEach(e => pushBoth('Email & Username', e));
+    usernames.forEach(u => pushBoth('Email & Username', u));
+
+    // groupB — Instagram, TikTok, Pinterest, Strava, Foursquare, Tumblr
+    const groupB = [];
+    identifiers.forEach(id => groupB.push(id));
+    phones.filter(Boolean).forEach(p => groupB.push(formatPhone(p)));
+    emails.filter(Boolean).forEach(e => groupB.push(e));
+    usernames.forEach(u => groupB.push(u));
+
+    // groupC — LinkedIn, RocketReach, SignalHire
+    const groupC = [];
+    identifiers.forEach(id => {
+        groupC.push(id);
+        cleanLocations.forEach(loc => {
+            if (loc.city) groupC.push(`${id}, ${loc.city}`);
+            if (loc.state) groupC.push(`${id}, ${loc.state}`);
+            if (loc.city && loc.state) groupC.push(`${id}, ${loc.city}, ${loc.state}`);
+        });
+        employers.filter(Boolean).forEach(emp => groupC.push(`${id}, ${emp}`));
+        schools.filter(Boolean).forEach(sch => groupC.push(`${id}, ${sch}`));
+        if (dob) {
+            groupC.push(`${id}, Birthday`);
+            if (dob.short) groupC.push(`${id}, ${dob.short}`);
+            groupC.push(`${id}, ${dob.full}`);
+        }
+    });
+    phones.filter(Boolean).forEach(p => groupC.push(formatPhone(p)));
+    emails.filter(Boolean).forEach(e => groupC.push(e));
+    usernames.forEach(u => groupC.push(u));
+
+    Object.keys(display).forEach(k => display[k] = dedupe(display[k]));
+
+    return {
+        full: dedupe(full),
+        groupB: dedupe(groupB),
+        groupC: dedupe(groupC),
+        display
+    };
+}
+
+/* =========================================================
+   PLATFORM URLS
+   ========================================================= */
+
+const PLATFORM_URL_BUILDERS = {
+    'Facebook': q => `https://www.facebook.com/search/people/?q=${encodeURIComponent(q)}&_rdc=1&_rdr`,
+    'Instagram': q => `https://imginn.com/search/?q=${encodeURIComponent(q)}`,
+    'X / Twitter': q => `https://www.x.com/search?q=${encodeURIComponent(q)}&src=typed_query&f=user`,
+    'YouTube': q => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}&sp=EgIQAg%253D%253D`,
+    'LinkedIn': q => `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(q)}&origin=GLOBAL_SEARCH_HEADER`,
+    'TikTok': q => `https://www.tiktok.com/search/user?q=${encodeURIComponent(q)}&lang=en`,
+    'Pinterest': q => `https://www.pinterest.com/search/users/?q=${encodeURIComponent(q)}&rs=filter`,
+    'Strava': q => `https://www.strava.com/athletes/search?utf8=%E2%9C%93&text=${encodeURIComponent(q)}&gsf=1`,
+    'Tumblr': q => `https://www.tumblr.com/search/${encodeURIComponent(q)}`,
+    'Google': q => `https://www.google.com/search?q=${encodeURIComponent(q)}&aqs=chrome..69i57.331j0j4&sourceid=chrome&ie=UTF-8`,
+    'RocketReach': q => `https://rocketreach.co/person?start=1&pageSize=10&keyword=${encodeURIComponent(q)}&_rdc=1&_rdr`,
+    'SignalHire': q => `https://www.signalhire.com/profiles/search?q=${encodeURIComponent(q)}`,
+    'Foursquare': q => `https://www.foursquare.com/search?tab=pagesResults&query=${encodeURIComponent(q)}`
+};
+
+function buildSearchUrl(query, platformName) {
+    const builder = PLATFORM_URL_BUILDERS[platformName] || PLATFORM_URL_BUILDERS['Google'];
+    return builder(query);
+}
+
+/* =========================================================
+   COPY HELPERS
+   ========================================================= */
+
+function showToast(message) {
+    let toast = document.getElementById('copyToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'copyToast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function copyText(text) {
+    navigator.clipboard.writeText(text).catch(() => alert('Could not copy to clipboard.'));
+}
+
+function removeEmptyParagraphs(container) {
+    container.querySelectorAll(':scope > p').forEach(p => {
+        const text = p.textContent.replace(/[\s\u00A0\u200B\u200C\u200D\uFEFF]+/g, '');
+        if (!text && !p.querySelector('a, img')) p.remove();
+    });
+}
+
+function applySpacingRules(container) {
+    container.querySelectorAll(':scope > p').forEach((p, idx) => {
+        p.style.margin = '0';
+        if (idx === 1) p.style.marginTop = '1em';
+    });
+}
+
+function buildCleanedList(queries, platformName) {
+    const container = document.createElement('div');
+
+    const header = document.createElement('p');
+    header.textContent = queries.length > 1
+        ? 'No match found. Please see search queries below.'
+        : 'No match found. Please see search query below.';
+    container.appendChild(header);
+
+    queries.forEach(q => {
+        const p = document.createElement('p');
+        const a = document.createElement('a');
+        a.href = buildSearchUrl(q, platformName);
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = q;
+        p.appendChild(a);
+        container.appendChild(p);
+    });
+    removeEmptyParagraphs(container);
+    applySpacingRules(container);
+
+    const makeSpacer = () => {
+        const spacer = document.createElement('p');
+        spacer.innerHTML = ' ';
+        spacer.style.margin = '0';
+        return spacer;
+    };
+    container.insertBefore(makeSpacer(), container.children[1] || null);
+    container.appendChild(makeSpacer());
+    container.appendChild(makeSpacer());
+
+    return container;
+}
+
+function copyCleanedList(queries, platformName, platformLabel) {
+    const container = buildCleanedList(queries, platformName);
+    const htmlContent = container.innerHTML;
+    const textContent = container.innerText;
+    const onSuccess = () => showToast(`Copied for ${platformLabel}`);
+    try {
+        const item = new ClipboardItem({
+            'text/html': new Blob([htmlContent], { type: 'text/html' }),
+            'text/plain': new Blob([textContent], { type: 'text/plain' })
+        });
+        navigator.clipboard.write([item]).then(onSuccess).catch(() => {
+            copyText(textContent);
+            onSuccess();
+        });
+    } catch {
+        copyText(textContent);
+        onSuccess();
+    }
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
+function getNamePartsLabeled(fullName) {
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    const n = parts.length;
+    const idx = i => parts[i - 1];
+    const ordinals = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth'];
+    if (n === 0) return [];
+    if (n === 1) return [['First Name', idx(1)]];
+    if (n === 2) return [['First Name', idx(1)], ['Last Name', idx(2)]];
+    const out = [];
+    for (let i = 1; i <= n - 2; i++) {
+        const label = ordinals[i - 1] || `Name Part ${i}`;
+        out.push([`${label} Name`, idx(i)]);
+    }
+    out.push(['Middle Name', idx(n - 1)]);
+    out.push(['Last Name', idx(n)]);
+    return out;
+}
+
+function exportToExcel(querySets, formData) {
+    if (!window.XLSX) {
+        alert('The Excel export library did not load. Check your internet connection and try again.');
+        return;
+    }
+
+    // ---- Sheet 1: Input Details ----
+    const detailRows = [['Field', 'Value']];
+    const section = title => detailRows.push([title, '']);
+    const blank = () => detailRows.push(['', '']);
+
+    section('NAME');
+    getNamePartsLabeled(formData.fullName).forEach(([label, val]) => detailRows.push([label, val]));
+    blank();
+
+    section('LOCATION');
+    formData.locations.forEach((loc, i) => {
+        detailRows.push([`City ${i + 1}`, loc.city]);
+        detailRows.push([`State ${i + 1}`, loc.state]);
+    });
+    blank();
+
+    section('DATES');
+    detailRows.push(['DOB', formData.dob ? formData.dob.full : '']);
+    formData.dateOfLossList.forEach((dol, i) => detailRows.push([`DOL ${i + 1}`, dol.full]));
+    blank();
+
+    section('EMAILS');
+    formData.emails.forEach((e, i) => detailRows.push([`Email ${i + 1}`, e]));
+    blank();
+
+    section('ALIASES');
+    formData.aliasEntries.forEach((a, i) => detailRows.push([`${a.type === 'username' ? 'Username' : 'Alias'} ${i + 1}`, a.value]));
+    blank();
+
+    section('PHONES');
+    formData.phones.forEach((p, i) => detailRows.push([`Phone ${i + 1}`, p]));
+    blank();
+
+    section('EMPLOYERS');
+    formData.employers.forEach((e, i) => detailRows.push([`Employer ${i + 1}`, e]));
+    blank();
+
+    section('SCHOOLS');
+    formData.schools.forEach((s, i) => detailRows.push([`School ${i + 1}`, s]));
+
+    const detailWs = XLSX.utils.aoa_to_sheet(detailRows);
+    detailWs['!cols'] = [{ wch: 20 }, { wch: 34 }];
+
+    // ---- Sheet 2: By Category ----
+    const rows = [['Category', 'Search String']];
+    CATEGORY_ORDER.forEach(category => {
+        (querySets.display[category] || []).forEach(q => rows.push([category, q]));
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{ wch: 20 }, { wch: 65 }];
+
+    // ---- Sheet 3: By Platform (one social media per column) ----
+    const platformColumns = PLATFORM_LIST.map(p => ({ label: p.label, key: p.key, rows: querySets[p.group] || [] }));
+    const maxRows = platformColumns.reduce((max, c) => Math.max(max, c.rows.length), 0);
+    const platRows = [platformColumns.map(c => c.label)];
+    for (let r = 0; r < maxRows; r++) {
+        platRows.push(platformColumns.map(c => c.rows[r] || ''));
+    }
+    const platWs = XLSX.utils.aoa_to_sheet(platRows);
+    platWs['!cols'] = platformColumns.map(() => ({ wch: 32 }));
+    platformColumns.forEach((col, colIdx) => {
+        col.rows.forEach((q, rowIdx) => {
+            const cellAddr = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
+            if (platWs[cellAddr]) {
+                platWs[cellAddr].l = { Target: buildSearchUrl(q, col.key) };
+            }
+        });
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, detailWs, 'Input Details');
+    XLSX.utils.book_append_sheet(wb, platWs, 'By Platform');
+    XLSX.utils.book_append_sheet(wb, ws, 'By Category');
+
+    const safeName = formData.fullName.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') || 'search-strings';
+    XLSX.writeFile(wb, `${safeName}.xlsx`);
+}
+
+function renderResults(querySets, formData) {
+    const resultsEl = document.getElementById('results');
+    resultsEl.innerHTML = '';
+
+    const totalCount = querySets.full.length;
+
+    if (!totalCount) {
+        resultsEl.innerHTML = `
+            <div class="empty-state">
+                <strong>Nothing generated yet</strong>
+                Fill in a name, city/state, phone, or alias in the panel on the left, then hit Generate.
+            </div>`;
+        return;
+    }
+
+    // action bar — single horizontal row of platform icons
+    const actionBar = document.createElement('div');
+    actionBar.className = 'action-bar';
+    const iconRow = document.createElement('div');
+    iconRow.className = 'platform-icon-row';
+    PLATFORM_LIST.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'platform-icon-btn';
+        btn.title = `Copy every relevant line as a clickable ${p.label} search link`;
+        btn.setAttribute('aria-label', `Copy for ${p.label}`);
+
+        const img = document.createElement('img');
+        img.src = `https://cdn.simpleicons.org/${p.slug}/${p.color}`;
+        img.alt = p.label;
+        img.loading = 'lazy';
+        img.onerror = function () {
+            this.onerror = null;
+            const fallback = document.createElement('span');
+            fallback.className = 'platform-icon-fallback';
+            fallback.style.color = '#' + p.color;
+            fallback.textContent = p.label.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase();
+            this.replaceWith(fallback);
+        };
+
+        btn.appendChild(img);
+        btn.addEventListener('click', () => copyCleanedList(querySets[p.group], p.key, p.label));
+        iconRow.appendChild(btn);
+    });
+    actionBar.appendChild(iconRow);
+
+    // filter row
+    const filterRow = document.createElement('div');
+    filterRow.className = 'filter-row';
+    const filterInput = document.createElement('input');
+    filterInput.type = 'text';
+    filterInput.placeholder = `Filter ${totalCount} search strings…`;
+    const expandToggle = document.createElement('button');
+    expandToggle.className = 'expand-toggle';
+    expandToggle.textContent = 'Expand all';
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'export-btn';
+    exportBtn.textContent = 'Export to Excel';
+    exportBtn.addEventListener('click', () => exportToExcel(querySets, formData));
+    filterRow.appendChild(filterInput);
+    filterRow.appendChild(expandToggle);
+    filterRow.appendChild(exportBtn);
+    actionBar.appendChild(filterRow);
+
+    resultsEl.appendChild(actionBar);
+
+    // categorized groups
+    const groupsWrap = document.createElement('div');
+    let allOpen = false;
+
+    CATEGORY_ORDER.forEach((category, catIdx) => {
+        const items = querySets.display[category];
+        if (!items.length) return;
+
+        const details = document.createElement('details');
+        details.className = 'result-group';
+        if (catIdx === 0) details.open = true;
+
+        const summary = document.createElement('summary');
+        summary.innerHTML = `<span>${category}</span><span class="count">${items.length}</span>`;
+        details.appendChild(summary);
+
+        const rowsWrap = document.createElement('div');
+        rowsWrap.className = 'rows';
+
+        items.forEach(q => {
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.dataset.text = q.toLowerCase();
+
+            const a = document.createElement('a');
+            a.href = buildSearchUrl(q, 'Google');
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = q;
+            row.appendChild(a);
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-mini';
+            copyBtn.textContent = 'Copy';
+            copyBtn.addEventListener('click', () => { copyText(q); showToast('Copied to clipboard'); });
+            row.appendChild(copyBtn);
+
+            rowsWrap.appendChild(row);
+        });
+
+        const noMatches = document.createElement('div');
+        noMatches.className = 'no-matches';
+        noMatches.textContent = 'No lines in this group match your filter.';
+        rowsWrap.appendChild(noMatches);
+
+        details.appendChild(rowsWrap);
+        groupsWrap.appendChild(details);
+    });
+
+    resultsEl.appendChild(groupsWrap);
+
+    // filter behavior
+    filterInput.addEventListener('input', () => {
+        const term = filterInput.value.trim().toLowerCase();
+        groupsWrap.querySelectorAll('.result-group').forEach(group => {
+            const rows = [...group.querySelectorAll('.row')];
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const match = !term || row.dataset.text.includes(term);
+                row.classList.toggle('hidden', !match);
+                if (match) visibleCount++;
+            });
+            const noMatches = group.querySelector('.no-matches');
+            noMatches.style.display = (term && visibleCount === 0) ? 'block' : 'none';
+            group.style.display = (term && rows.length && visibleCount === 0 && !noMatches) ? 'none' : '';
+            if (term) group.open = true;
+        });
+    });
+
+    expandToggle.addEventListener('click', () => {
+        allOpen = !allOpen;
+        groupsWrap.querySelectorAll('.result-group').forEach(g => g.open = allOpen);
+        expandToggle.textContent = allOpen ? 'Collapse all' : 'Expand all';
+    });
+}
+
+/* =========================================================
+   GENERATE / CLEAR
+   ========================================================= */
+
+function buildDatePartsObj(mmRaw, ddRaw, yyyyRaw) {
+    const mm = (mmRaw || '').trim();
+    const dd = (ddRaw || '').trim();
+    const yyyy = (yyyyRaw || '').trim();
+    if (!mm && !dd && !yyyy) return null;
+
+    const mmPad = mm ? mm.padStart(2, '0') : '';
+    const ddPad = dd ? dd.padStart(2, '0') : '';
+
+    let full;
+    if (mmPad && ddPad && yyyy) full = `${mmPad}/${ddPad}/${yyyy}`;
+    else if (mmPad && ddPad) full = `${mmPad}/${ddPad}`;
+    else if (mmPad && yyyy) full = `${mmPad}/${yyyy}`;
+    else if (ddPad && yyyy) full = `${ddPad}/${yyyy}`;
+    else if (yyyy) full = yyyy;
+    else if (mmPad) full = mmPad;
+    else full = ddPad;
+
+    const short = (mmPad && ddPad) ? `${mmPad}/${ddPad}` : null;
+
+    return { mm: mmPad, dd: ddPad, yyyy, full, short };
+}
+
+function extractDateComponents(raw) {
+    const trimmed = (raw || '').trim();
+    const isPlaceholder = s => /^x+$/i.test(s.trim());
+    if (!trimmed) return { mm: '', dd: '', yyyy: '' };
+
+    const segs = trimmed.split('/').map(s => s.trim());
+    let mm = '', dd = '', yyyy = '';
+
+    if (segs.length >= 3) {
+        const [a, b, c] = segs;
+        mm = isPlaceholder(a) ? '' : a;
+        dd = isPlaceholder(b) ? '' : b;
+        yyyy = isPlaceholder(c) ? '' : c;
+    } else if (segs.length === 2) {
+        const [a, b] = segs;
+        const bLooksLikeYear = /^\d{4}$/.test(b) || (isPlaceholder(b) && b.length === 4);
+        mm = isPlaceholder(a) ? '' : a;
+        if (bLooksLikeYear) yyyy = isPlaceholder(b) ? '' : b;
+        else dd = isPlaceholder(b) ? '' : b;
+    } else {
+        const [a] = segs;
+        if (!isPlaceholder(a) && a) {
+            if (/^\d{4}$/.test(a)) yyyy = a;
+            else mm = a;
+        }
+    }
+    return { mm, dd, yyyy };
+}
+
+function parseDateTextToObj(raw) {
+    const { mm, dd, yyyy } = extractDateComponents(raw);
+    return buildDatePartsObj(mm, dd, yyyy);
+}
+
+// Converts an older {mm,dd,yyyy} save shape into the new "MM/DD/YYYY with
+// XX/XXXX placeholders" text format, so older .json/.html saves still load.
+function composeDateText(d) {
+    if (!d) return '';
+    if (typeof d.raw === 'string') return d.raw;
+    const mm = d.mm || d.dobMonth || '';
+    const dd = d.dd || d.dobDay || '';
+    const yyyy = d.yyyy || d.dobYear || '';
+    if (!mm && !dd && !yyyy) return '';
+    return `${mm || 'XX'}/${dd || 'XX'}/${yyyy || 'XXXX'}`;
+}
+
+/* =========================================================
+   SAVE / LOAD (JSON file — preserves the form exactly as-is)
+   ========================================================= */
+
+function collectFormState() {
+    const fullName = document.getElementById('fullName').value;
+    const dob = { raw: document.getElementById('dobDate').value };
+    const dateOfLoss = [...document.querySelectorAll('.dol-row')].map(row => ({
+        raw: row.querySelector('.dol-date').value
+    }));
+    const locations = [...document.querySelectorAll('.location-row')].map(row => ({
+        city: row.querySelector('.city-input').value,
+        state: row.querySelector('.state-input').value
+    }));
+    const phones = [...document.querySelectorAll('.phone-input')].map(i => i.value);
+    const emails = [...document.querySelectorAll('.email-input')].map(i => i.value);
+    const employers = [...document.querySelectorAll('.employment-input')].map(i => i.value);
+    const schools = [...document.querySelectorAll('.school-input')].map(i => i.value);
+    const aliases = [...document.querySelectorAll('.alias-row')].map(row => ({
+        value: row.querySelector('.alias-input').value,
+        type: row.querySelector('.alias-type-radio:checked')?.value || 'alias'
+    }));
+    const checkedNameVariants = [...document.querySelectorAll('.name-variant-checkbox')]
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+    return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        fullName, dob, dateOfLoss, locations, phones, emails, employers, schools, aliases, checkedNameVariants
+    };
+}
+
+function lockForm() {
+    document.body.classList.add('locked');
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.type === 'file') return;
+        el.disabled = true;
+    });
+    if (!document.getElementById('lockedBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'lockedBanner';
+        banner.textContent = 'This is a saved record — fields are locked and cannot be edited.';
+        document.body.insertBefore(banner, document.body.firstChild);
+    }
+}
+
+function saveAsStaticHtml() {
+    const fullName = document.getElementById('fullName').value.trim();
+    if (!fullName) {
+        alert('Enter a full name before saving.');
+        return;
+    }
+    const state = collectFormState();
+    const stateJson = JSON.stringify(state).replace(/<\/script/gi, '<\\\/script');
+
+    // Built via concatenation on purpose: writing the literal closing script
+    // or body tag text directly in this file's own source would make this
+    // very function's source match itself when the saved copy is searched below.
+    const closeScript = '<' + '/script>';
+    const closeBody = '<' + '/body>';
+
+    const injected =
+        '\n<script type="application/json" id="__savedState">' + stateJson + closeScript +
+        '\n<script>\n' +
+        "window.addEventListener('DOMContentLoaded', function () {\n" +
+        '    try {\n' +
+        "        var el = document.getElementById('__savedState');\n" +
+        '        var state = JSON.parse(el.textContent);\n' +
+        '        applyFormState(state);\n' +
+        '        lockForm();\n' +
+        '    } catch (e) {\n' +
+        "        console.error('Could not restore saved data', e);\n" +
+        '    }\n' +
+        '});\n' +
+        closeScript + '\n';
+
+    const idx = ORIGINAL_DOCUMENT_HTML.lastIndexOf(closeBody);
+    const body = idx === -1
+        ? ORIGINAL_DOCUMENT_HTML + injected + closeBody
+        : ORIGINAL_DOCUMENT_HTML.slice(0, idx) + injected + ORIGINAL_DOCUMENT_HTML.slice(idx);
+    const outputHtml = '<!DOCTYPE html>\n' + body;
+
+    const blob = new Blob([outputHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = fullName.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') || 'search-string-save';
+    a.href = url;
+    a.download = `${safeName}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Saved — file downloaded');
+}
+
+function fillListRows(container, values, makeRowFn, fillRowFn) {
+    container.innerHTML = '';
+    const list = (values && values.length) ? values : [undefined];
+    list.forEach(v => {
+        const row = makeRowFn();
+        container.appendChild(row);
+        fillRowFn(row, v || {});
+    });
+}
+
+function applyFormState(state) {
+    document.getElementById('fullName').value = state.fullName || '';
+    renderNameVariantPreview();
+    if (Array.isArray(state.checkedNameVariants)) {
+        const checkedSet = new Set(state.checkedNameVariants);
+        document.querySelectorAll('.name-variant-checkbox').forEach(cb => {
+            cb.checked = checkedSet.has(cb.value);
+            cb.closest('.variant-row').classList.toggle('unchecked', !cb.checked);
+        });
+    }
+
+    document.getElementById('dobDate').value = composeDateText(state.dob);
+
+    fillListRows(dolRows, state.dateOfLoss, makeDolRow, (row, d) => {
+        row.querySelector('.dol-date').value = composeDateText(d);
+    });
+
+    fillListRows(locationRows, state.locations, makeLocationRow, (row, l) => {
+        row.querySelector('.city-input').value = l.city || '';
+        row.querySelector('.state-input').value = l.state || '';
+    });
+
+    fillListRows(phoneRows, state.phones, () => makeRemovableInput('Phone number', 'tel', 'phone-input'),
+        (row, v) => { row.querySelector('.phone-input').value = (typeof v === 'string' ? v : '') || ''; });
+
+    fillListRows(emailRows, state.emails, () => makeRemovableInput('Email address', 'text', 'email-input'),
+        (row, v) => { row.querySelector('.email-input').value = (typeof v === 'string' ? v : '') || ''; });
+
+    fillListRows(employmentRows, state.employers, () => makeRemovableInput('Employer', 'text', 'employment-input'),
+        (row, v) => { row.querySelector('.employment-input').value = (typeof v === 'string' ? v : '') || ''; });
+
+    fillListRows(schoolRows, state.schools, () => makeRemovableInput('School', 'text', 'school-input'),
+        (row, v) => { row.querySelector('.school-input').value = (typeof v === 'string' ? v : '') || ''; });
+
+    fillListRows(aliasRows, state.aliases, makeAliasRow, (row, a) => {
+        row.querySelector('.alias-input').value = a.value || '';
+        const wantType = a.type === 'username' ? 'username' : 'alias';
+        const radio = [...row.querySelectorAll('.alias-type-radio')].find(r => r.value === wantType);
+        if (radio) radio.checked = true;
+    });
+
+    document.getElementById('results').innerHTML = '';
+}
+
+function loadStateFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        const raw = reader.result;
+        let state = null;
+
+        // Plain .json save
+        try {
+            state = JSON.parse(raw);
+        } catch {
+            // Self-contained .html save — extract the embedded state
+            try {
+                const doc = new DOMParser().parseFromString(raw, 'text/html');
+                const el = doc.getElementById('__savedState');
+                if (el) state = JSON.parse(el.textContent);
+            } catch { /* fall through */ }
+        }
+
+        if (!state) {
+            alert('That file could not be read — is it a valid save file?');
+            return;
+        }
+        applyFormState(state);
+        showToast('Loaded saved data');
+    };
+    reader.onerror = () => alert('Could not read that file.');
+    reader.readAsText(file);
+}
+
+document.getElementById('saveStateBtn').addEventListener('click', saveAsStaticHtml);
+document.getElementById('loadStateBtn').addEventListener('click', () => document.getElementById('loadStateInput').click());
+document.getElementById('loadStateInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) loadStateFromFile(file);
+    e.target.value = '';
+});
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+    const fullName = document.getElementById('fullName').value.trim();
+    if (!fullName) {
+        alert('Enter a full name to generate search strings.');
+        return;
+    }
+
+    const aliasEntries = [...document.querySelectorAll('.alias-row')].map(row => ({
+        value: row.querySelector('.alias-input').value.trim(),
+        type: row.querySelector('.alias-type-radio:checked')?.value || 'alias'
+    })).filter(a => a.value);
+    const aliases = aliasEntries.filter(a => a.type === 'alias').map(a => a.value);
+    const aliasUsernames = aliasEntries.filter(a => a.type === 'username').map(a => a.value);
+    const locations = [...document.querySelectorAll('.location-row')]
+        .map(row => ({
+            city: row.querySelector('.city-input').value.trim(),
+            state: row.querySelector('.state-input').value.trim()
+        }))
+        .filter(l => l.city || l.state);
+    const phones = [...document.querySelectorAll('.phone-input')].map(i => i.value.trim()).filter(Boolean);
+    const emails = [...document.querySelectorAll('.email-input')].map(i => i.value.trim()).filter(Boolean);
+    const employers = [...document.querySelectorAll('.employment-input')].map(i => i.value.trim()).filter(Boolean);
+    const schools = [...document.querySelectorAll('.school-input')].map(i => i.value.trim()).filter(Boolean);
+
+    const dob = parseDateTextToObj(document.getElementById('dobDate').value);
+    const dateOfLossList = [...document.querySelectorAll('.dol-row')]
+        .map(row => parseDateTextToObj(row.querySelector('.dol-date').value))
+        .filter(Boolean);
+
+    const checkedBoxes = [...document.querySelectorAll('.name-variant-checkbox')];
+    const nameVariantsList = checkedBoxes.length
+        ? checkedBoxes.filter(cb => cb.checked).map(cb => cb.value)
+        : nameVariants(fullName);
+
+    const querySets = buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dob, dateOfLossList });
+    const formData = { fullName, locations, phones, emails, employers, schools, dob, dateOfLossList, aliasEntries };
+    renderResults(querySets, formData);
+});
+
+document.getElementById('clearGenBtn').addEventListener('click', () => {
+    document.getElementById('fullName').value = '';
+    document.getElementById('dobDate').value = '';
+    locationRows.innerHTML = '';
+    phoneRows.innerHTML = '';
+    aliasRows.innerHTML = '';
+    emailRows.innerHTML = '';
+    employmentRows.innerHTML = '';
+    schoolRows.innerHTML = '';
+    dolRows.innerHTML = '';
+    addDynamicRow(locationRows, makeLocationRow);
+    addDynamicRow(phoneRows, () => makeRemovableInput('Phone number', 'tel', 'phone-input'));
+    addDynamicRow(aliasRows, makeAliasRow);
+    addDynamicRow(emailRows, () => makeRemovableInput('Email address', 'text', 'email-input'));
+    addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input'));
+    addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input'));
+    addDynamicRow(dolRows, makeDolRow);
+    nameVariantList.innerHTML = '';
+    const oldActions = nameVariantField.querySelector('.variant-actions');
+    if (oldActions) oldActions.remove();
+    nameVariantField.style.display = 'none';
+    document.getElementById('results').innerHTML = '';
+});
+</script>
+
+<footer class="site-footer">© 2026 NS Tool Kits v3 | Made by Morvan Hsu | Darel Miranda | Milles Jethro Del Rosario</footer>
+    <script>
+document.addEventListener("keydown", function(e) {
+  // Block F12 and common shortcuts (Ctrl+Shift+I/J, Ctrl+U)
+  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === "C") {
+    e.preventDefault();
+  }
+});
+// Optional: Disable right-click
+document.addEventListener("contextmenu", e => e.preventDefault());
+</script>
+<script src="../js/guard.js"></script>
+</body>
+</html>
