@@ -1611,6 +1611,31 @@ function lockForm() {
     }
 }
 
+// Minimal stylesheet used ONLY by the saved file (just the subject panel).
+const SAVED_FILE_CSS = `
+:root{--signal:#F6C90E;--line:rgba(255,255,255,0.12);--slate:#B8B8B8;--sans:'Inter',system-ui,-apple-system,sans-serif;}
+*{box-sizing:border-box;}
+body{margin:0;background:radial-gradient(circle at top,#1a1a1a 0%,#0b0b0b 60%);font-family:var(--sans);color:#fff;min-height:100vh;}
+#lockedBanner{background:#211b08;color:#F6C90E;border-bottom:1px solid rgba(246,201,14,0.55);padding:10px 20px;font-weight:700;font-size:0.82rem;text-align:center;}
+.sidebar{max-width:420px;margin:0 auto;padding:24px 22px 40px;background:rgba(16,16,16,0.96);border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:100vh;}
+.field-section{margin-bottom:22px;}
+.field-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#f3f3f3;margin:0 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11px;font-weight:700;color:#f3f3f3;letter-spacing:0.3px;margin-bottom:5px;}
+.date-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--slate);}
+input[type="text"],input[type="tel"],input[type="date"]{width:100%;padding:9px 11px;border:1.5px solid rgba(255,255,255,0.10);border-radius:7px;font-size:0.88rem;font-family:var(--sans);background:#202020;color:#929292;color-scheme:dark;outline:none;cursor:not-allowed;}
+input::placeholder{color:#8f8f8f;}
+.dynamic-row,.location-row,.dol-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+.dynamic-row input,.dol-row input{flex:1;}
+.alias-row{border:1.5px solid rgba(255,255,255,0.16);border-radius:7px;padding:7px 8px;margin-bottom:6px;background:rgba(255,255,255,0.045);}
+.alias-row-top{display:flex;gap:6px;margin-bottom:6px;}
+.alias-row-top input{flex:1;}
+.alias-type-toggle{display:flex;gap:16px;font-size:0.76rem;color:#fff;}
+.alias-type-toggle label{display:flex;align-items:center;gap:4px;font-weight:600;margin:0;cursor:not-allowed;}
+.alias-type-toggle input[type="radio"]{margin:0;}
+`;
+
 function saveAsStaticHtml() {
     const fullName = document.getElementById('fullName').value.trim();
     if (!fullName) {
@@ -1620,32 +1645,45 @@ function saveAsStaticHtml() {
     const state = collectFormState();
     const stateJson = JSON.stringify(state).replace(/<\/script/gi, '<\\\/script');
 
-    // Built via concatenation on purpose: writing the literal closing script
-    // or body tag text directly in this file's own source would make this
-    // very function's source match itself when the saved copy is searched below.
+    // Clone ONLY the subject panel (the form shown in the sidebar)
+    const sidebar = document.querySelector('.sidebar');
+    const clone = sidebar.cloneNode(true);
+
+    // Copy live input values/checked state onto the clone's attributes
+    const origInputs = sidebar.querySelectorAll('input');
+    const cloneInputs = clone.querySelectorAll('input');
+    origInputs.forEach((o, i) => {
+        const c = cloneInputs[i];
+        if (!c) return;
+        if (o.type === 'radio' || o.type === 'checkbox') {
+            if (o.checked) c.setAttribute('checked', ''); else c.removeAttribute('checked');
+        } else if (o.type !== 'file') {
+            c.setAttribute('value', o.value);
+        }
+        c.setAttribute('disabled', '');
+    });
+
+    // Remove everything that isn't part of the saved form view
+    clone.querySelectorAll('.add-link, .icon-btn, .variant-actions, #nameVariantField, .sidebar-actions').forEach(el => el.remove());
+    clone.removeAttribute('style');
+
+    // Built via concatenation so the literal closing script tag isn't in this file's own source
     const closeScript = '<' + '/script>';
-    const closeBody = '<' + '/body>';
 
-    const injected =
-        '\n<script type="application/json" id="__savedState">' + stateJson + closeScript +
-        '\n<script>\n' +
-        "window.addEventListener('DOMContentLoaded', function () {\n" +
-        '    try {\n' +
-        "        var el = document.getElementById('__savedState');\n" +
-        '        var state = JSON.parse(el.textContent);\n' +
-        '        applyFormState(state);\n' +
-        '        lockForm();\n' +
-        '    } catch (e) {\n' +
-        "        console.error('Could not restore saved data', e);\n" +
-        '    }\n' +
-        '});\n' +
-        closeScript + '\n';
-
-    const idx = ORIGINAL_DOCUMENT_HTML.lastIndexOf(closeBody);
-    const body = idx === -1
-        ? ORIGINAL_DOCUMENT_HTML + injected + closeBody
-        : ORIGINAL_DOCUMENT_HTML.slice(0, idx) + injected + ORIGINAL_DOCUMENT_HTML.slice(idx);
-    const outputHtml = '<!DOCTYPE html>\n' + body;
+    const outputHtml =
+        '<!DOCTYPE html>\n' +
+        '<html lang="en">\n<head>\n' +
+        '<meta charset="UTF-8">\n' +
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+        '<title>' + fullName.replace(/</g, '&lt;') + ' — Saved Record</title>\n' +
+        '<link rel="icon" type="image/jpg" href="https://i.imgur.com/QWLMgK8.jpeg">\n' +
+        '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">\n' +
+        '<style>' + SAVED_FILE_CSS + '</style>\n' +
+        '</head>\n<body>\n' +
+        '<div id="lockedBanner">This is a saved record — fields are locked and cannot be edited.</div>\n' +
+        clone.outerHTML + '\n' +
+        '<script type="application/json" id="__savedState">' + stateJson + closeScript + '\n' +
+        '</body>\n</html>';
 
     const blob = new Blob([outputHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -1818,17 +1856,17 @@ document.getElementById('clearGenBtn').addEventListener('click', () => {
 <footer class="site-footer">© 2026 NS Tool Kits v3 | Made by Morvan Hsu | Darel Miranda | Milles Jethro Del Rosario</footer>
     <script>
 document.addEventListener("keydown", function(e) {
-  // Block F12 and common shortcuts (Ctrl+Shift+I/J, Ctrl+U)
-  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
-    e.preventDefault();
-    return false;
-  }
+  // Block F12 and common shortcuts (Ctrl+Shift+I/J, Ctrl+U)
+  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+    e.preventDefault();
+    return false;
+  }
 });
 
 document.addEventListener("keydown", function(e) {
-  if (e.ctrlKey && e.shiftKey && e.key === "C") {
-    e.preventDefault();
-  }
+  if (e.ctrlKey && e.shiftKey && e.key === "C") {
+    e.preventDefault();
+  }
 });
 // Optional: Disable right-click
 document.addEventListener("contextmenu", e => e.preventDefault());
