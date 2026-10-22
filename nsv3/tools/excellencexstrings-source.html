@@ -902,6 +902,72 @@ addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-inp
 addDynamicRow(dolRows, makeDolRow);
 
 /* =========================================================
+   AUTO-CASING ON PASTE
+   Name / Alias / Employment / School / City / State -> Proper Case
+   Email / Username                   -> lowercase
+   ========================================================= */
+
+function toProperCase(str) {
+    let out = String(str).toLocaleLowerCase();
+    // capitalise the first letter at the start and after space, hyphen, slash, period, "(" or en dash
+    out = out.replace(/(^|[\s\-\/.(\u2013])(\p{L})/gu, (m, sep, ch) => sep + ch.toLocaleUpperCase());
+    // O'Brien, D'Angelo, L'Oreal
+    out = out.replace(/\b([ODL])'(\p{L})/gu, (m, a, b) => `${a}'${b.toLocaleUpperCase()}`);
+    // McDonald
+    out = out.replace(/\bMc(\p{L})/gu, (m, a) => `Mc${a.toLocaleUpperCase()}`);
+    // suffix numerals
+    out = out.replace(/\b(Ii|Iii|Iv)\b/g, m => m.toUpperCase());
+    return out;
+}
+
+// State: Proper Case, except 2-letter codes (ca, CA -> CA)
+function toStateCase(str) {
+    const t = String(str).trim();
+    return /^\p{L}{2}$/u.test(t) ? t.toLocaleUpperCase() : toProperCase(str);
+}
+
+function toLowerClean(str) {
+    return String(str).trim().toLocaleLowerCase();
+}
+
+// Returns the casing function for a pasted-into input, or null if the field isn't auto-cased
+function casingFor(el) {
+    if (!el || el.tagName !== 'INPUT') return null;
+    if (el.id === 'fullName') return toProperCase;
+    if (el.classList.contains('email-input')) return toLowerClean;
+    if (el.classList.contains('employment-input')) return toProperCase;
+    if (el.classList.contains('school-input')) return toProperCase;
+    if (el.classList.contains('city-input')) return toProperCase;
+    if (el.classList.contains('state-input')) return toStateCase;
+    if (el.classList.contains('alias-input')) {
+        const row = el.closest('.alias-row');
+        const checked = row && row.querySelector('.alias-type-radio:checked');
+        return (checked && checked.value === 'username') ? toLowerClean : toProperCase;
+    }
+    return null;
+}
+
+document.addEventListener('paste', e => {
+    const fn = casingFor(e.target);
+    if (!fn) return;
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text) return;
+    e.preventDefault();
+    const cased = fn(text.replace(/\s*[\r\n]+\s*/g, ' '));
+    const el = e.target;
+    el.setRangeText(cased, el.selectionStart, el.selectionEnd, 'end');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+});
+
+// Switching an alias row between Alias and Username re-cases what's already in it
+document.addEventListener('change', e => {
+    if (!e.target.classList || !e.target.classList.contains('alias-type-radio')) return;
+    const input = e.target.closest('.alias-row').querySelector('.alias-input');
+    if (!input.value.trim()) return;
+    input.value = e.target.value === 'username' ? toLowerClean(input.value) : toProperCase(input.value);
+});
+
+/* =========================================================
    NAME COMBINATION PICKER
    ========================================================= */
 
