@@ -4,7 +4,7 @@ Copyright © 2026 NSToolkits (Darel Miranda & Morvan Hsu). All rights reserved.
 
 ⚠️ Restricted Use Notice
 
-This repository, website, browser extensions, source code, designs, and associated intellectual property are the exclusive property of NSToolkits (created by Darel Miranda & Morvan Hsu).
+This repository, website, browser extensions, source code, designs, and associated intellectual property are the exclusive property of NSToolkits (created by Darel Miranda | Morvan Hsu | Milles Jethro Del Rosario).
 
 1. Unauthorized Access & Use
 
@@ -30,6 +30,6 @@ For inquiries regarding authorization, licensing, or permissions, please contact
 
 NSToolkits Team
 
-Creators: Darel Miranda & Morvan Hsu
+Creators: Darel Miranda & Morvan Hsu & Milles Jethro Del Rosario
 
 Inquiries: Contact us directly if you have any questions or require access.
