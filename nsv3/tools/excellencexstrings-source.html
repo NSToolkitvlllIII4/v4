@@ -1077,11 +1077,14 @@ function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, ph
         }
 
         dateOfLossList.forEach(dol => {
-            pushBoth('Date of Loss', `${id}, ${dol.full}`);
-            cleanLocations.forEach(loc => {
-                if (loc.city) pushBoth('Date of Loss', `${id}, ${loc.city}, ${dol.full}`);
-                if (loc.state) pushBoth('Date of Loss', `${id}, ${loc.state}, ${dol.full}`);
-                if (loc.city && loc.state) pushBoth('Date of Loss', `${id}, ${loc.city}, ${loc.state}, ${dol.full}`);
+            const dolForms = dol.short ? [dol.short, dol.full] : [dol.full];
+            dolForms.forEach(df => {
+                pushBoth('Date of Loss', `${id}, ${df}`);
+                cleanLocations.forEach(loc => {
+                    if (loc.city) pushBoth('Date of Loss', `${id}, ${loc.city}, ${df}`);
+                    if (loc.state) pushBoth('Date of Loss', `${id}, ${loc.state}, ${df}`);
+                    if (loc.city && loc.state) pushBoth('Date of Loss', `${id}, ${loc.city}, ${loc.state}, ${df}`);
+                });
             });
         });
     });
@@ -1496,31 +1499,40 @@ function renderResults(querySets, formData) {
    ========================================================= */
 
 function buildDatePartsObj(mmRaw, ddRaw, yyyyRaw) {
+    const isPh = s => /^x+$/i.test(s);
     const mm = (mmRaw || '').trim();
     const dd = (ddRaw || '').trim();
     const yyyy = (yyyyRaw || '').trim();
     if (!mm && !dd && !yyyy) return null;
+    // Nothing real known at all (e.g. XX/XX/XXXX) -> no usable date
+    if ([mm, dd, yyyy].every(p => !p || isPh(p))) return null;
 
-    const mmPad = mm ? mm.padStart(2, '0') : '';
-    const ddPad = dd ? dd.padStart(2, '0') : '';
+    // Unknown parts (XX / XXXX) are kept in the string exactly as placeholders
+    const mmPad = isPh(mm) ? 'XX' : (mm ? mm.padStart(2, '0') : '');
+    const ddPad = isPh(dd) ? 'XX' : (dd ? dd.padStart(2, '0') : '');
+    const yyyyOut = isPh(yyyy) ? 'XXXX' : yyyy;
 
     let full;
-    if (mmPad && ddPad && yyyy) full = `${mmPad}/${ddPad}/${yyyy}`;
+    if (mmPad && ddPad && yyyyOut) full = `${mmPad}/${ddPad}/${yyyyOut}`;
     else if (mmPad && ddPad) full = `${mmPad}/${ddPad}`;
-    else if (mmPad && yyyy) full = `${mmPad}/${yyyy}`;
-    else if (ddPad && yyyy) full = `${ddPad}/${yyyy}`;
-    else if (yyyy) full = yyyy;
+    else if (mmPad && yyyyOut) full = `${mmPad}/${yyyyOut}`;
+    else if (ddPad && yyyyOut) full = `${ddPad}/${yyyyOut}`;
+    else if (yyyyOut) full = yyyyOut;
     else if (mmPad) full = mmPad;
     else full = ddPad;
 
-    const short = (mmPad && ddPad) ? `${mmPad}/${ddPad}` : null;
+    // Short (MM/DD) form whenever month and day are both given (XX counts) and at least one is real
+    const short = (mmPad && ddPad && !(isPh(mmPad) && isPh(ddPad))) ? `${mmPad}/${ddPad}` : null;
 
-    return { mm: mmPad, dd: ddPad, yyyy, full, short };
+    return { mm: mmPad, dd: ddPad, yyyy: yyyyOut, full, short };
 }
 
 function extractDateComponents(raw) {
     const trimmed = (raw || '').trim();
     const isPlaceholder = s => /^x+$/i.test(s.trim());
+    // Normalise placeholders by position: XX for month/day, XXXX for year
+    const keepMD = s => isPlaceholder(s) ? 'XX' : s;
+    const keepY = s => isPlaceholder(s) ? 'XXXX' : s;
     if (!trimmed) return { mm: '', dd: '', yyyy: '' };
 
     const segs = trimmed.split('/').map(s => s.trim());
@@ -1528,15 +1540,15 @@ function extractDateComponents(raw) {
 
     if (segs.length >= 3) {
         const [a, b, c] = segs;
-        mm = isPlaceholder(a) ? '' : a;
-        dd = isPlaceholder(b) ? '' : b;
-        yyyy = isPlaceholder(c) ? '' : c;
+        mm = keepMD(a);
+        dd = keepMD(b);
+        yyyy = keepY(c);
     } else if (segs.length === 2) {
         const [a, b] = segs;
         const bLooksLikeYear = /^\d{4}$/.test(b) || (isPlaceholder(b) && b.length === 4);
-        mm = isPlaceholder(a) ? '' : a;
-        if (bLooksLikeYear) yyyy = isPlaceholder(b) ? '' : b;
-        else dd = isPlaceholder(b) ? '' : b;
+        mm = keepMD(a);
+        if (bLooksLikeYear) yyyy = keepY(b);
+        else dd = keepMD(b);
     } else {
         const [a] = segs;
         if (!isPlaceholder(a) && a) {
