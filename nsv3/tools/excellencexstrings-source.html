@@ -1949,6 +1949,64 @@ document.addEventListener("keydown", function(e) {
 // Optional: Disable right-click
 document.addEventListener("contextmenu", e => e.preventDefault());
 </script>
+ <script>
+const usStates = {
+    // 50 U.S. States
+    AL: "Alabama", AK: "Alaska", AZ: "Arizona",
+    AR: "Arkansas", CA: "California", CO: "Colorado",
+    CT: "Connecticut", DE: "Delaware", FL: "Florida",
+    GA: "Georgia", HI: "Hawaii", ID: "Idaho",
+    IL: "Illinois", IN: "Indiana", IA: "Iowa",
+    KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+    ME: "Maine", MD: "Maryland", MA: "Massachusetts",
+    MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
+    MO: "Missouri", MT: "Montana", NE: "Nebraska",
+    NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+    NM: "New Mexico", NY: "New York", NC: "North Carolina",
+    ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
+    OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island",
+    SC: "South Carolina", SD: "South Dakota", TN: "Tennessee",
+    TX: "Texas", UT: "Utah", VT: "Vermont",
+    VA: "Virginia", WA: "Washington", WV: "West Virginia",
+    WI: "Wisconsin", WY: "Wyoming",
+
+    // Federal District
+    DC: "District of Columbia",
+
+    // U.S. Territories
+    AS: "American Samoa",
+    GU: "Guam",
+    MP: "Northern Mariana Islands",
+    PR: "Puerto Rico",
+    VI: "U.S. Virgin Islands",
+
+    // U.S. Minor Outlying Islands
+    UM: "U.S. Minor Outlying Islands"
+};
+
+document.getElementById("locationRows").addEventListener("focusout", function (event) {
+    const input = event.target;
+
+    if (input.tagName !== "INPUT") return;
+
+    const identifier = [
+        input.name,
+        input.id,
+        input.placeholder,
+        input.getAttribute("aria-label")
+    ].join(" ").toLowerCase();
+
+    if (!identifier.includes("state")) return;
+
+    const value = input.value.trim().toUpperCase();
+
+    if (usStates[value]) {
+        input.value = usStates[value];
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+});
+</script>
 <script src="../js/guard.js"></script>
 </body>
 </html>
