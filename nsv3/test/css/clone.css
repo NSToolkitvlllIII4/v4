@@ -1,0 +1,142 @@
+/* Clones: extra copies of a network.
+   1) The sidebar list of clones under a network.
+   2) Nested accordion sections (one per clone) inside a network's form section. */
+
+/* ---- 1. Sidebar ---- */
+.net-row { display: flex; align-items: center; gap: 6px; }
+.net-row > .net { flex: 1; min-width: 0; }
+.net-row__add { flex: 0 0 28px; }
+
+/* Like the other rail labels: hidden until the rail opens. */
+.rail .net-row__add,
+.rail .clones { opacity: 0; transition: opacity .15s; }
+.rail:hover .net-row__add, .rail:has(:focus-visible) .net-row__add,
+.rail:hover .clones, .rail:has(:focus-visible) .clones { opacity: 1; transition-delay: .08s; }
+
+/* While the rail is narrow the list takes up no room, so the network tiles stay together
+   (the count badge on each tile says how many accounts there are). The list slides open with the rail. */
+.rail .clones { transition: opacity .15s, max-height .25s var(--ease), margin-top .25s var(--ease); }
+.rail:not(:hover):not(:has(:focus-visible)) .clones { max-height: 0; margin-top: 0; overflow: hidden; }
+
+/* Clones: same height and width as a network row, no tile, a slightly lighter backdrop. */
+.clones {
+  --clone-bg: #161616;
+  --clone-bg-hover: #1e1e1e;
+  --clone-indent: 58px;  /* 58px lines the name up with the network name above; raise it to indent more */
+  --clone-visible: 5.5;  /* rows shown before the list scrolls; the half row hints there is more */
+  position: relative;    /* lets scripts measure row positions inside the list */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px -6px 0 0;  /* the 6px scrollbar hangs in the rail padding, so rows keep the same width */
+  max-height: calc(var(--clone-visible) * 44px); /* 42px row + 2px gap */
+  overflow-y: auto;
+  overscroll-behavior: contain; /* the wheel scrolls this list, not the whole sidebar */
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+.clones::-webkit-scrollbar { width: 6px; }
+.clones::-webkit-scrollbar-track { background: transparent; }
+.clones::-webkit-scrollbar-thumb { background: var(--muted); }
+.clones::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
+
+.net-row--clone {
+  flex: 0 0 42px; /* never shrink, even when the list is capped */
+  height: 42px;
+  background: var(--clone-bg);
+  transition: background .15s;
+}
+.net-row--clone:hover,
+.net-row--clone:focus-within { background: var(--clone-bg-hover); }
+
+.clone__name {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 var(--clone-indent);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #bdbdbd;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color .15s;
+}
+.clone__name:hover { color: var(--yellow); }
+.clone__name:focus-visible { outline-offset: -2px; }
+
+/* The clone open in the form */
+.net-row--clone[aria-current="true"] { background: var(--clone-bg-hover); box-shadow: inset 3px 0 0 var(--yellow); }
+.net-row--clone[aria-current="true"] .clone__name { color: var(--text); }
+
+/* The remove button sits directly under the first row's "+" button. */
+.net-row--clone .btn--icon { flex: 0 0 28px; }
+
+/* ---- 2. Form sections ---- */
+/* A section inside a section (one per clone): boxed, a step smaller. */
+.section--nested { border: 1px solid var(--line); background: var(--ink); }
+.section--nested + .section--nested { margin-top: 10px; }
+.section--nested > .section__summary { padding: 12px 12px 12px 14px; font-size: 14px; }
+.section--nested > .section__body { padding: 4px 12px 14px; }
+
+/* Network sections take their brand color for the marker bar.
+   Lightened so dark brand colors (TikTok, Threads) stay visible on black.
+   Set the color from Alpine with an object:  :style="{ '--brand-color': net.color }" */
+.section--brand > .section__summary::before {
+  background: color-mix(in srgb, var(--brand-color, var(--yellow)) 75%, #fff);
+}
+
+/* ---- 3. Clone stepper (form) ----
+   Shows one clone at a time:   <  Facebook [ 59 ] of 63  >
+   Sticks to the top while you scroll a long clone. Hide it (hidden attribute) when there is only one clone. */
+.clone-stepper {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  background: var(--black);
+  border-bottom: 1px solid var(--line);
+}
+.clone-stepper[hidden] { display: none; }
+.clone-stepper .btn--icon { width: 36px; height: 36px; font-size: 20px; }
+
+.clone-stepper__jump {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.clone-stepper__name { color: var(--text); font-weight: 600; }
+.clone-stepper__jump .input { width: 64px; padding: 6px 8px; text-align: center; font-weight: 600; }
+
+/* ---- 4. Blink: where a new account went (js/features/clone-highlight.js adds .is-ping) ----
+   Two yellow pulses. Inset shadows tint the element without changing its layout or stacking. */
+@keyframes ping {
+  0%, 40%, 100% { box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
+  15%, 65% {
+    box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--yellow) 30%, transparent),
+                inset 0 0 0 2px var(--yellow);
+  }
+}
+/* Reduced motion: one slow fade in and out, no flashing */
+@keyframes ping-still {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
+  20%, 80% {
+    box-shadow: inset 0 0 0 100vmax color-mix(in srgb, var(--yellow) 30%, transparent),
+                inset 0 0 0 2px var(--yellow);
+  }
+}
+.is-ping { animation: ping 1.2s ease-in-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  .is-ping { animation: ping-still 1.6s ease-in-out 1; }
+}

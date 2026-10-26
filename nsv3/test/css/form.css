@@ -1,0 +1,58 @@
+/* Form pane: accordion sections. */
+.form {
+  padding: 28px;
+}
+.form .pane__title { margin-bottom: 14px; }
+
+.section { border-bottom: 1px solid var(--line); }
+.section:first-child { border-top: 1px solid var(--line); }
+
+.section__summary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 16px 14px;
+  font-size: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.section__summary::-webkit-details-marker { display: none; }
+.section__summary::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  width: 3px; height: 0;
+  background: var(--yellow);
+  transform: translateY(-50%);
+  transition: height .18s var(--ease);
+}
+.section[open] > .section__summary::before { height: 60%; }
+.section__summary::after { content: "+"; color: var(--yellow); font-size: 20px; line-height: 1; }
+.section[open] > .section__summary::after { content: "\2013"; }
+.section__summary:hover { color: var(--yellow); }
+
+/* Groups inside a section stack with an even gap; hidden groups leave no gap. */
+.section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 20px 14px;
+}
+
+.empty {
+  padding: 14px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* "+ Add metric": the choices appear as small buttons that wrap */
+.metric-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: var(--black);
+  border: 1px dashed var(--yellow);
+}
