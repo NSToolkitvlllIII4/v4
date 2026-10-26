@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ease App: component preview</title>
+  <!-- Dev only. Open this to see each form component in isolation. No scripts. -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/form.css">
+  <link rel="stylesheet" href="../css/fieldset.css">
+  <link rel="stylesheet" href="../css/input.css">
+  <link rel="stylesheet" href="../css/choice.css">
+  <link rel="stylesheet" href="../css/segmented.css">
+  <link rel="stylesheet" href="../css/button.css">
+  <link rel="stylesheet" href="../css/vendor/quill.core.css">
+  <link rel="stylesheet" href="../css/editor.css">
+  <link rel="stylesheet" href="../css/clone.css">
+  <style>
+    body { padding: 28px; max-width: 920px; }
+    h1 { font-size: 15px; margin: 26px 0 12px; color: var(--muted); font-weight: 600; }
+    h1:first-child { margin-top: 0; }
+    .demo { display: flex; flex-direction: column; gap: 14px; max-width: 560px; }
+    .demo-clones { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 24px; align-items: start; }
+    .demo-scroll { height: 420px; overflow: auto; border: 1px solid var(--line); }
+    .demo-scroll .clone-panel { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .demo-scroll h2 { font-size: 16px; }
+    .demo-note { margin-top: 12px; color: var(--muted); font-size: 13px; max-width: 70ch; }
+    .demo-controls { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    @media (max-width: 720px) { .demo-clones { grid-template-columns: 1fr; } }
+    /* Show the sidebar in its expanded state inside the page */
+    .demo-rail .rail { position: static; width: var(--rail-w-open); height: auto; border: 1px solid var(--yellow); }
+    .demo-rail .rail .rail__label, .demo-rail .rail .net-row__add, .demo-rail .rail .clones { opacity: 1; }
+    .demo-rail .rail:not(:hover):not(:has(:focus-visible)) .clones { max-height: calc(var(--clone-visible) * 44px); margin-top: 2px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>Fieldsets and legends</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Demographics</legend>
+      <div class="stack">
+        <input class="input" type="text" placeholder="Joined date">
+        <fieldset class="fieldset fieldset--compact">
+          <legend>Education details</legend>
+          <input class="input" type="text" placeholder="Nested, compact group">
+        </fieldset>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset" hidden><legend>Hidden group</legend></fieldset>
+  </div>
+
+  <h1>Text inputs</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Names &amp; links</legend>
+      <div class="stack">
+        <div class="field-row">
+          <input class="input" type="text" placeholder="Enter name">
+          <input class="input" type="text" placeholder="Paste URL / hyperlink" data-type="hyperlink">
+        </div>
+        <input class="input" type="text" value="Filled value">
+        <input class="input" type="text" placeholder="Disabled field" disabled>
+        <textarea class="input" placeholder="Notes (textarea)"></textarea>
+        <div class="field-grid">
+          <input class="input" type="text" placeholder="Left">
+          <input class="input" type="text" placeholder="Right">
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <h1>Segmented switch (try the arrow keys and Tab)</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Report version</legend>
+      <div class="segmented">
+        <label class="segmented__opt"><input type="radio" name="ver" value="plus" checked><span>Plus</span></label>
+        <label class="segmented__opt"><input type="radio" name="ver" value="progressive"><span>Progressive</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>Gender</legend>
+      <div class="segmented">
+        <label class="segmented__opt"><input type="radio" name="gen" value="male"><span>Male</span></label>
+        <label class="segmented__opt"><input type="radio" name="gen" value="female" checked><span>Female</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>Three and four options</legend>
+      <div class="stack">
+        <div class="segmented">
+          <label class="segmented__opt"><input type="radio" name="t3" checked><span>One</span></label>
+          <label class="segmented__opt"><input type="radio" name="t3"><span>Two</span></label>
+          <label class="segmented__opt"><input type="radio" name="t3"><span>Three</span></label>
+        </div>
+        <div class="segmented">
+          <label class="segmented__opt"><input type="radio" name="t4"><span>A</span></label>
+          <label class="segmented__opt"><input type="radio" name="t4"><span>B</span></label>
+          <label class="segmented__opt"><input type="radio" name="t4"><span>C</span></label>
+          <label class="segmented__opt"><input type="radio" name="t4" checked><span>D</span></label>
+        </div>
+        <div class="segmented">
+          <label class="segmented__opt"><input type="radio" name="dis" checked disabled><span>Disabled</span></label>
+          <label class="segmented__opt"><input type="radio" name="dis" disabled><span>Option</span></label>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <h1>Checkboxes and radios</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Null?</legend>
+      <div class="choice-group">
+        <label class="choice"><input type="radio" name="null" checked> Yes</label>
+        <label class="choice"><input type="radio" name="null"> No</label>
+        <label class="choice"><input type="radio" name="null" disabled> Disabled</label>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>Employment &amp; education</legend>
+      <div class="stack">
+        <div class="field-row">
+          <label class="choice"><input type="checkbox" checked> Include employment?</label>
+          <input class="input" type="text" placeholder="Employer">
+        </div>
+        <div class="field-row">
+          <label class="choice"><input type="checkbox"> Include school?</label>
+          <input class="input" type="text" placeholder="School">
+        </div>
+        <label class="choice"><input type="checkbox" disabled> Disabled checkbox</label>
+      </div>
+    </fieldset>
+  </div>
+  <h1>Buttons</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Names &amp; links</legend>
+      <div class="stack">
+        <div class="field-row">
+          <input class="input" type="text" placeholder="Enter name">
+          <input class="input" type="text" placeholder="Paste URL / hyperlink">
+          <button type="button" class="btn btn--ghost btn--danger" aria-label="Remove row">&times;</button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn--add">+ Add another</button>
+          <button type="button" class="btn btn--danger">Remove last</button>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend>All variants</legend>
+      <div class="actions">
+        <button type="button" class="btn">Default</button>
+        <button type="button" class="btn btn--primary">Primary</button>
+        <button type="button" class="btn btn--add">+ Add</button>
+        <button type="button" class="btn btn--danger">Danger</button>
+        <button type="button" class="btn btn--ghost">Ghost</button>
+        <button type="button" class="btn btn--icon" aria-label="Add network">+</button>
+        <button type="button" class="btn btn--icon btn--danger" aria-label="Remove network">&minus;</button>
+        <button type="button" class="btn" disabled>Disabled</button>
+        <button type="button" class="btn btn--add" disabled>+ Disabled</button>
+      </div>
+    </fieldset>
+  </div>
+  <h1>Rich link field (Quill markup, as Quill renders it)</h1>
+  <div class="demo">
+    <fieldset class="fieldset">
+      <legend>Identified by</legend>
+      <div class="stack">
+        <div class="input ql-container ql-snow"><div class="ql-editor ql-blank" contenteditable="true" data-placeholder="Identified By (e.g. Visual Match, URL)"><p><br></p></div></div>
+        <div class="input ql-container ql-snow"><div class="ql-editor" contenteditable="true"><p>Visual match, profile photo at <a href="#">https://example.com/a-very-long-profile-link-that-needs-to-wrap/abc123</a></p></div></div>
+      </div>
+    </fieldset>
+  </div>
+
+  <h1>Clones: form sections</h1>
+  <div class="demo">
+    <details class="section section--brand" open style="--brand-color:#1877F2">
+      <summary class="section__summary">Facebook data</summary>
+      <div class="section__body">
+        <details class="section section--nested" open>
+          <summary class="section__summary">Facebook 1</summary>
+          <div class="section__body"><p class="empty">Fields for clone 1.</p></div>
+        </details>
+        <details class="section section--nested">
+          <summary class="section__summary">Facebook 2</summary>
+          <div class="section__body"><p class="empty">Fields for clone 2.</p></div>
+        </details>
+      </div>
+    </details>
+    <details class="section section--brand" style="--brand-color:#000000">
+      <summary class="section__summary">TikTok data (black brand color stays visible)</summary>
+      <div class="section__body"><p class="empty">Fields.</p></div>
+    </details>
+  </div>
+
+  <h1>Many clones: capped sidebar list + stepper (interactive)</h1>
+  <div class="demo-clones">
+    <div class="demo-rail">
+      <aside class="rail">
+        <nav class="rail__group">
+          <ul class="rail__list">
+            <li>
+              <div class="net-row">
+                <label class="net">
+                  <input class="net__input" type="checkbox" checked>
+                  <span class="net__tile" aria-hidden="true">FB</span>
+                  <span class="net__name rail__label">Facebook</span>
+                  <span class="net__switch" aria-hidden="true"></span>
+                </label>
+                <button type="button" class="btn btn--icon net-row__add" id="cd-add" aria-label="Add another Facebook">+</button>
+              </div>
+              <ul class="clones" id="cd-list"></ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+    </div>
+
+    <div class="demo-scroll">
+      <div class="clone-stepper" id="cd-stepper" role="group" aria-label="Facebook clones">
+        <button type="button" class="btn btn--icon" id="cd-prev" aria-label="Previous clone">&lsaquo;</button>
+        <div class="clone-stepper__jump">
+          <span class="clone-stepper__name">Facebook</span>
+          <input class="input" id="cd-jump" type="text" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Go to clone number">
+          <span id="cd-of"></span>
+        </div>
+        <button type="button" class="btn btn--icon" id="cd-next" aria-label="Next clone">&rsaquo;</button>
+      </div>
+      <div class="clone-panel">
+        <h2 id="cd-title"></h2>
+        <fieldset class="fieldset"><legend>Identified by</legend><input class="input" type="text" placeholder="Visual match, URL"></fieldset>
+        <fieldset class="fieldset"><legend>Metrics</legend><div class="field-grid"><input class="input" type="text" placeholder="# Posts"><input class="input" type="text" placeholder="# Friends"><input class="input" type="text" placeholder="# Followers"><input class="input" type="text" placeholder="# Following"></div></fieldset>
+        <fieldset class="fieldset"><legend>Demographics</legend><div class="stack"><input class="input" type="text" placeholder="Previous city"><input class="input" type="text" placeholder="Current city"><input class="input" type="text" placeholder="Employer"><input class="input" type="text" placeholder="School"></div></fieldset>
+        <fieldset class="fieldset"><legend>Account status</legend><input class="input" type="text" placeholder="Details"></fieldset>
+        <fieldset class="fieldset"><legend>Findings</legend><textarea class="input" placeholder="Notes"></textarea></fieldset>
+      </div>
+    </div>
+  </div>
+  <p class="demo-note">Starts at clone 59 of 63. Try: the arrows, typing a number in the box (Enter or click away; Esc cancels; Up/Down arrows step; out-of-range numbers snap to the nearest clone), clicking a clone in the sidebar list, the + button, and removing clones. Scroll the clone panel to see the stepper stay in place. Removing the current clone moves to the previous one; with a single clone left the stepper disappears.</p>
+  <div class="demo-controls">
+    <button type="button" class="btn" id="cd-reset">Reset to 63 clones</button>
+    <button type="button" class="btn" id="cd-few">Show 3 clones</button>
+    <button type="button" class="btn" id="cd-one">Show 1 clone</button>
+  </div>
+
+  <script>
+    /* Preview logic only (plain JS so this page works from the folder). The real version will be an Alpine component. */
+    (() => {
+      const NAME = 'Facebook';
+      let total = 63, active = 59;
+      const $ = (id) => document.getElementById(id);
+      const list = $('cd-list'), stepper = $('cd-stepper'), jump = $('cd-jump'), of = $('cd-of');
+      const prev = $('cd-prev'), next = $('cd-next'), title = $('cd-title');
+      const clamp = (n) => Math.min(Math.max(n, 1), total);
+
+      function buildList() {
+        list.replaceChildren();
+        for (let n = 2; n <= total; n++) {
+          const li = document.createElement('li');
+          li.className = 'net-row net-row--clone';
+          li.dataset.n = n;
+          const name = document.createElement('button');
+          name.type = 'button'; name.className = 'clone__name'; name.textContent = NAME + ' ' + n;
+          const rm = document.createElement('button');
+          rm.type = 'button'; rm.className = 'btn btn--icon btn--ghost btn--danger';
+          rm.setAttribute('aria-label', 'Remove ' + NAME + ' ' + n); rm.innerHTML = '&minus;';
+          li.append(name, rm);
+          list.append(li);
+        }
+      }
+
+      // Keep the open clone in view inside the capped list.
+      function reveal(row, smooth) {
+        if (!list.scrollTo) return;
+        const top = row.offsetTop - (list.clientHeight - row.offsetHeight) / 2;
+        const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        list.scrollTo({ top: Math.max(0, top), behavior: smooth && !calm ? 'smooth' : 'auto' });
+      }
+
+      function render(smooth = true) {
+        stepper.hidden = total < 2;
+        of.textContent = 'of ' + total;
+        jump.value = active;
+        prev.disabled = active <= 1;
+        next.disabled = active >= total;
+        title.textContent = NAME + ' ' + active;
+        list.querySelectorAll('[aria-current]').forEach((el) => el.removeAttribute('aria-current'));
+        const row = list.querySelector('[data-n="' + active + '"]');
+        if (row) { row.setAttribute('aria-current', 'true'); reveal(row, smooth); }
+      }
+
+      const go = (n) => { active = clamp(n); render(); };
+      const commitJump = () => { const n = parseInt(jump.value, 10); go(Number.isNaN(n) ? active : n); };
+      const setTotal = (t, a) => { total = t; active = clamp(a); buildList(); render(false); };
+
+      prev.addEventListener('click', () => go(active - 1));
+      next.addEventListener('click', () => go(active + 1));
+      jump.addEventListener('input', () => { jump.value = jump.value.replace(/\D/g, ''); });
+      jump.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); commitJump(); }
+        else if (e.key === 'Escape') { jump.value = active; }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); go(active + 1); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); go(active - 1); }
+      });
+      jump.addEventListener('blur', commitJump);
+      jump.addEventListener('focus', () => jump.select());
+
+      list.addEventListener('click', (e) => {
+        const row = e.target.closest('.net-row--clone');
+        if (!row) return;
+        const n = Number(row.dataset.n);
+        if (e.target.closest('.btn--danger')) {
+          total -= 1;
+          if (n <= active) active = Math.max(1, active - 1); // removing the open clone (or one before it) steps back
+          buildList(); render(false);
+        } else {
+          go(n);
+        }
+      });
+
+      $('cd-add').addEventListener('click', () => { total += 1; active = total; buildList(); render(); });
+      $('cd-reset').addEventListener('click', () => setTotal(63, 59));
+      $('cd-few').addEventListener('click', () => setTotal(3, 2));
+      $('cd-one').addEventListener('click', () => setTotal(1, 1));
+
+      buildList(); render(false);
+    })();
+  </script>
+</body>
+</html>
