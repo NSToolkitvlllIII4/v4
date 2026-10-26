@@ -1143,7 +1143,7 @@ function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, ph
         }
 
         dateOfLossList.forEach(dol => {
-            const dolForms = dol.short ? [dol.short, dol.full] : [dol.full];
+            const dolForms = [dol.full];
             dolForms.forEach(df => {
                 pushBoth('Date of Loss', `${id}, ${df}`);
                 cleanLocations.forEach(loc => {
