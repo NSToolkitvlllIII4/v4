@@ -138,6 +138,12 @@
     .date-hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--slate); }
     .dol-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
     .dol-row .date-text-input { flex: 1; }
+    .dob-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+    .dob-row .date-text-input { flex: 1; }
+    .region-switch { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.76rem; color: var(--ink); }
+    .region-switch .region-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-size: 11px; }
+    .region-switch label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 600; }
+    .region-switch input[type="radio"] { cursor: pointer; margin: 0; }
 
     .alias-row {
         border: 1.5px solid var(--line);
@@ -647,8 +653,9 @@
                 <div id="nameVariantList" class="variant-list"></div>
             </div>
             <div class="field">
-                <label>Date of birth <span class="date-hint">— paste as MM/DD/YYYY; use XX or XXXX for an unknown part</span></label>
-                <input type="text" id="dobDate" placeholder="MM/DD/YYYY" class="date-text-input">
+                <label>Date(s) of birth <span class="date-hint">— paste as MM/DD/YYYY; use XX or XXXX for an unknown part</span></label>
+                <div id="dobRows"></div>
+                <button type="button" class="add-link" id="addDob">+ Add another date of birth</button>
             </div>
         </div>
 
@@ -702,6 +709,12 @@
                 <div id="schoolRows"></div>
                 <button type="button" class="add-link" id="addSchool">+ Add another school</button>
             </div>
+        </div>
+
+        <div class="region-switch" id="googleRegionSwitch">
+            <span class="region-label">Google</span>
+            <label><input type="radio" name="googleRegion" value="US" checked> US (.com)</label>
+            <label><input type="radio" name="googleRegion" value="CA"> CA (.ca)</label>
         </div>
 
         <div class="sidebar-actions">
@@ -824,6 +837,26 @@ function makeDolRow() {
     return row;
 }
 
+function makeDobRow() {
+    const row = document.createElement('div');
+    row.className = 'dob-row';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'MM/DD/YYYY';
+    input.className = 'date-text-input dob-date';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'icon-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => row.remove());
+
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    return row;
+}
+
 let aliasRowCounter = 0;
 function makeAliasRow() {
     const groupName = 'aliasType' + (aliasRowCounter++);
@@ -884,6 +917,7 @@ const emailRows = document.getElementById('emailRows');
 const employmentRows = document.getElementById('employmentRows');
 const schoolRows = document.getElementById('schoolRows');
 const dolRows = document.getElementById('dolRows');
+const dobRows = document.getElementById('dobRows');
 
 document.getElementById('addLocation').addEventListener('click', () => addDynamicRow(locationRows, makeLocationRow));
 document.getElementById('addPhone').addEventListener('click', () => addDynamicRow(phoneRows, () => makeRemovableInput('Phone number', 'tel', 'phone-input')));
@@ -892,6 +926,7 @@ document.getElementById('addEmail').addEventListener('click', () => addDynamicRo
 document.getElementById('addEmployment').addEventListener('click', () => addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input')));
 document.getElementById('addSchool').addEventListener('click', () => addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input')));
 document.getElementById('addDol').addEventListener('click', () => addDynamicRow(dolRows, makeDolRow));
+document.getElementById('addDob').addEventListener('click', () => addDynamicRow(dobRows, makeDobRow));
 
 addDynamicRow(locationRows, makeLocationRow);
 addDynamicRow(phoneRows, () => makeRemovableInput('Phone number', 'tel', 'phone-input'));
@@ -900,6 +935,7 @@ addDynamicRow(emailRows, () => makeRemovableInput('Email address', 'text', 'emai
 addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input'));
 addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input'));
 addDynamicRow(dolRows, makeDolRow);
+addDynamicRow(dobRows, makeDobRow);
 
 /* =========================================================
    AUTO-CASING ON PASTE
@@ -1111,7 +1147,7 @@ function dedupe(arr) {
     });
 }
 
-function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dob, dateOfLossList }) {
+function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dobList, dateOfLossList }) {
     const cleanLocations = locations.filter(l => l.city || l.state);
     const identifiers = [...nameVariantsList, ...aliases.filter(Boolean)];
     const usernames = [
@@ -1136,11 +1172,11 @@ function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, ph
         employers.filter(Boolean).forEach(emp => pushBoth('Employer & School', `${id}, ${emp}`));
         schools.filter(Boolean).forEach(sch => pushBoth('Employer & School', `${id}, ${sch}`));
 
-        if (dob) {
-            pushBoth('Birthday', `${id}, Birthday`);
+        if (dobList.length) pushBoth('Birthday', `${id}, Birthday`);
+        dobList.forEach(dob => {
             if (dob.short) pushBoth('Birthday', `${id}, ${dob.short}`);
             pushBoth('Birthday', `${id}, ${dob.full}`);
-        }
+        });
 
         dateOfLossList.forEach(dol => {
             const dolForms = [dol.full];
@@ -1177,11 +1213,11 @@ function buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, ph
         });
         employers.filter(Boolean).forEach(emp => groupC.push(`${id}, ${emp}`));
         schools.filter(Boolean).forEach(sch => groupC.push(`${id}, ${sch}`));
-        if (dob) {
-            groupC.push(`${id}, Birthday`);
+        if (dobList.length) groupC.push(`${id}, Birthday`);
+        dobList.forEach(dob => {
             if (dob.short) groupC.push(`${id}, ${dob.short}`);
             groupC.push(`${id}, ${dob.full}`);
-        }
+        });
     });
     phones.filter(Boolean).forEach(p => groupC.push(formatPhone(p)));
     emails.filter(Boolean).forEach(e => groupC.push(e));
@@ -1211,11 +1247,25 @@ const PLATFORM_URL_BUILDERS = {
     'Pinterest': q => `https://www.pinterest.com/search/users/?q=${encodeURIComponent(q)}&rs=filter`,
     'Strava': q => `https://www.strava.com/athletes/search?utf8=%E2%9C%93&text=${encodeURIComponent(q)}&gsf=1`,
     'Tumblr': q => `https://www.tumblr.com/search/${encodeURIComponent(q)}`,
-    'Google': q => `https://www.google.com/search?q=${encodeURIComponent(q)}&aqs=chrome..69i57.331j0j4&sourceid=chrome&ie=UTF-8`,
+    'Google': q => `https://www.google.${googleTld()}/search?q=${encodeURIComponent(q)}&aqs=chrome..69i57.331j0j4&sourceid=chrome&ie=UTF-8`,
     'RocketReach': q => `https://rocketreach.co/person?start=1&pageSize=10&keyword=${encodeURIComponent(q)}&_rdc=1&_rdr`,
     'SignalHire': q => `https://www.signalhire.com/profiles/search?q=${encodeURIComponent(q)}`,
     'Foursquare': q => `https://www.foursquare.com/search?tab=pagesResults&query=${encodeURIComponent(q)}`
 };
+
+// Google region switch: US -> google.com, CA -> google.ca (Google only)
+function googleTld() {
+    const checked = document.querySelector('input[name="googleRegion"]:checked');
+    return checked && checked.value === 'CA' ? 'ca' : 'com';
+}
+
+// Re-point already-rendered Google links when the region switch changes
+document.addEventListener('change', e => {
+    if (!e.target || e.target.name !== 'googleRegion') return;
+    document.querySelectorAll('a[data-google-q]').forEach(a => {
+        a.href = buildSearchUrl(a.dataset.googleQ, 'Google');
+    });
+});
 
 function buildSearchUrl(query, platformName) {
     const builder = PLATFORM_URL_BUILDERS[platformName] || PLATFORM_URL_BUILDERS['Google'];
@@ -1270,6 +1320,7 @@ function buildCleanedList(queries, platformName) {
         const p = document.createElement('p');
         const a = document.createElement('a');
         a.href = buildSearchUrl(q, platformName);
+        if (platformName === 'Google') a.dataset.googleQ = q;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
         a.textContent = q;
@@ -1357,7 +1408,8 @@ function exportToExcel(querySets, formData) {
     blank();
 
     section('DATES');
-    detailRows.push(['DOB', formData.dob ? formData.dob.full : '']);
+    if (formData.dobList.length) formData.dobList.forEach((d, i) => detailRows.push([`DOB ${i + 1}`, d.full]));
+    else detailRows.push(['DOB', '']);
     formData.dateOfLossList.forEach((dol, i) => detailRows.push([`DOL ${i + 1}`, dol.full]));
     blank();
 
@@ -1510,6 +1562,7 @@ function renderResults(querySets, formData) {
 
             const a = document.createElement('a');
             a.href = buildSearchUrl(q, 'Google');
+            a.dataset.googleQ = q;
             a.target = '_blank';
             a.rel = 'noopener';
             a.textContent = q;
@@ -1648,7 +1701,11 @@ function composeDateText(d) {
 
 function collectFormState() {
     const fullName = document.getElementById('fullName').value;
-    const dob = { raw: document.getElementById('dobDate').value };
+    const dateOfBirth = [...document.querySelectorAll('.dob-row')].map(row => ({
+        raw: row.querySelector('.dob-date').value
+    }));
+    const dob = dateOfBirth[0] || { raw: '' }; // first DOB kept for older versions of the tool
+    const googleRegion = googleTld() === 'ca' ? 'CA' : 'US';
     const dateOfLoss = [...document.querySelectorAll('.dol-row')].map(row => ({
         raw: row.querySelector('.dol-date').value
     }));
@@ -1671,7 +1728,7 @@ function collectFormState() {
     return {
         version: 1,
         savedAt: new Date().toISOString(),
-        fullName, dob, dateOfLoss, locations, phones, emails, employers, schools, aliases, checkedNameVariants
+        fullName, dob, dateOfBirth, googleRegion, dateOfLoss, locations, phones, emails, employers, schools, aliases, checkedNameVariants
     };
 }
 
@@ -1704,8 +1761,8 @@ body{margin:0;background:radial-gradient(circle at top,#1a1a1a 0%,#0b0b0b 60%);f
 .date-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--slate);}
 input[type="text"],input[type="tel"],input[type="date"]{width:100%;padding:9px 11px;border:1.5px solid rgba(255,255,255,0.10);border-radius:7px;font-size:0.88rem;font-family:var(--sans);background:#202020;color:#929292;color-scheme:dark;outline:none;cursor:not-allowed;}
 input::placeholder{color:#8f8f8f;}
-.dynamic-row,.location-row,.dol-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
-.dynamic-row input,.dol-row input{flex:1;}
+.dynamic-row,.location-row,.dol-row,.dob-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+.dynamic-row input,.dol-row input,.dob-row input{flex:1;}
 .alias-row{border:1.5px solid rgba(255,255,255,0.16);border-radius:7px;padding:7px 8px;margin-bottom:6px;background:rgba(255,255,255,0.045);}
 .alias-row-top{display:flex;gap:6px;margin-bottom:6px;}
 .alias-row-top input{flex:1;}
@@ -1797,7 +1854,15 @@ function applyFormState(state) {
         });
     }
 
-    document.getElementById('dobDate').value = composeDateText(state.dob);
+    const dobSaved = (Array.isArray(state.dateOfBirth) && state.dateOfBirth.length)
+        ? state.dateOfBirth
+        : (state.dob ? [state.dob] : []);
+    fillListRows(dobRows, dobSaved, makeDobRow, (row, d) => {
+        row.querySelector('.dob-date').value = composeDateText(d);
+    });
+
+    const regionRadio = document.querySelector(`input[name="googleRegion"][value="${state.googleRegion === 'CA' ? 'CA' : 'US'}"]`);
+    if (regionRadio) regionRadio.checked = true;
 
     fillListRows(dolRows, state.dateOfLoss, makeDolRow, (row, d) => {
         row.querySelector('.dol-date').value = composeDateText(d);
@@ -1891,7 +1956,9 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     const employers = [...document.querySelectorAll('.employment-input')].map(i => i.value.trim()).filter(Boolean);
     const schools = [...document.querySelectorAll('.school-input')].map(i => i.value.trim()).filter(Boolean);
 
-    const dob = parseDateTextToObj(document.getElementById('dobDate').value);
+    const dobList = [...document.querySelectorAll('.dob-row')]
+        .map(row => parseDateTextToObj(row.querySelector('.dob-date').value))
+        .filter(Boolean);
     const dateOfLossList = [...document.querySelectorAll('.dol-row')]
         .map(row => parseDateTextToObj(row.querySelector('.dol-date').value))
         .filter(Boolean);
@@ -1901,14 +1968,14 @@ document.getElementById('generateBtn').addEventListener('click', () => {
         ? checkedBoxes.filter(cb => cb.checked).map(cb => cb.value)
         : nameVariants(fullName);
 
-    const querySets = buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dob, dateOfLossList });
-    const formData = { fullName, locations, phones, emails, employers, schools, dob, dateOfLossList, aliasEntries };
+    const querySets = buildQueries({ nameVariantsList, aliases, aliasUsernames, locations, phones, emails, employers, schools, dobList, dateOfLossList });
+    const formData = { fullName, locations, phones, emails, employers, schools, dobList, dateOfLossList, aliasEntries };
     renderResults(querySets, formData);
 });
 
 document.getElementById('clearGenBtn').addEventListener('click', () => {
     document.getElementById('fullName').value = '';
-    document.getElementById('dobDate').value = '';
+    dobRows.innerHTML = '';
     locationRows.innerHTML = '';
     phoneRows.innerHTML = '';
     aliasRows.innerHTML = '';
@@ -1923,6 +1990,7 @@ document.getElementById('clearGenBtn').addEventListener('click', () => {
     addDynamicRow(employmentRows, () => makeRemovableInput('Employer', 'text', 'employment-input'));
     addDynamicRow(schoolRows, () => makeRemovableInput('School', 'text', 'school-input'));
     addDynamicRow(dolRows, makeDolRow);
+    addDynamicRow(dobRows, makeDobRow);
     nameVariantList.innerHTML = '';
     const oldActions = nameVariantField.querySelector('.variant-actions');
     if (oldActions) oldActions.remove();
@@ -2006,6 +2074,152 @@ document.getElementById("locationRows").addEventListener("focusout", function (e
         input.dispatchEvent(new Event("change", { bubbles: true }));
     }
 });
+
+// State suggestions: custom dropdown (4 rows visible, scrolls for more)
+(function () {
+    const style = document.createElement('style');
+    style.textContent = `
+    #stateDropdown {
+        position: fixed; display: none; z-index: 9999;
+        box-sizing: border-box; max-height: 74px; overflow-y: auto; overflow-x: hidden;
+        background: #1A1A1A; border: 1px solid #797979; border-radius: 5px;
+        font-family: inherit; font-size: 12px; color: #f3f3f3;
+        scrollbar-width: thin; scrollbar-color: #616161 #1A1A1A;
+    }
+    #stateDropdown .sd-row {
+        position: relative; box-sizing: border-box; height: 18px; line-height: 16px;
+        padding: 0 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        border-radius: 5px;
+    }
+    #stateDropdown .sd-row + .sd-row::before {
+        content: ''; position: absolute; top: 0; left: 5px; right: 5px; border-top: 1px solid #616161;
+    }
+    #stateDropdown .sd-row.active, #stateDropdown .sd-row:hover {
+        box-shadow: inset 0 0 0 1px #3F3F3F; background: #1A1A1A;
+    }
+    #stateDropdown .sd-row b { font-weight: 700; color: #F6C90E; }
+    `;
+    document.head.appendChild(style);
+
+    const dd = document.createElement('div');
+    dd.id = 'stateDropdown';
+    document.body.appendChild(dd);
+
+    const names = Object.values(usStates).sort((x, y) => x.localeCompare(y));
+    let current = null;   // the state input the dropdown belongs to
+    let active = -1;      // highlighted row index
+
+    function matchStates(raw) {
+        const q = raw.trim().toLowerCase();
+        if (!q) return [];
+        const scored = [];
+        names.forEach(n => {
+            const l = n.toLowerCase();
+            let score = -1;
+            if (l.startsWith(q)) score = 1;
+            else if (l.split(/[\s.]+/).some(w => w.startsWith(q))) score = 2;
+            else if (l.includes(q)) score = 3;
+            if (score > 0) scored.push({ n, score });
+        });
+        const abbr = usStates[raw.trim().toUpperCase()];
+        if (abbr) {
+            const i = scored.findIndex(x => x.n === abbr);
+            if (i >= 0) scored[i].score = 0; else scored.push({ n: abbr, score: 0 });
+        }
+        scored.sort((x, y) => x.score - y.score || x.n.localeCompare(y.n));
+        return scored.map(x => x.n);
+    }
+
+    function position() {
+        if (!current) return;
+        const r = current.getBoundingClientRect();
+        dd.style.width = r.width + 'px';   // same width as the textbox
+        dd.style.left = r.left + 'px';
+        dd.style.top = (r.bottom + 2) + 'px';
+    }
+
+    function hide() { dd.style.display = 'none'; active = -1; }
+
+    function setActive(i) {
+        const rows = dd.querySelectorAll('.sd-row');
+        if (!rows.length) return;
+        active = (i + rows.length) % rows.length;
+        rows.forEach((r, k) => r.classList.toggle('active', k === active));
+        // keep the highlighted row visible inside the dropdown only (never scrolls the page)
+        const row = rows[active];
+        if (row.offsetTop < dd.scrollTop) dd.scrollTop = row.offsetTop;
+        else if (row.offsetTop + row.offsetHeight > dd.scrollTop + dd.clientHeight) dd.scrollTop = row.offsetTop + row.offsetHeight - dd.clientHeight;
+    }
+
+    function choose(name) {
+        if (!current) return;
+        current.value = name;
+        current.dispatchEvent(new Event('input', { bubbles: true }));
+        current.dispatchEvent(new Event('change', { bubbles: true }));
+        hide();
+    }
+
+    function render() {
+        if (!current) return hide();
+        const typed = current.value;
+        const list = matchStates(typed);
+        // nothing to suggest if the box already holds the one and only match
+        if (!list.length || (list.length === 1 && list[0].toLowerCase() === typed.trim().toLowerCase())) return hide();
+        dd.innerHTML = '';
+        const q = typed.trim();
+        list.forEach(name => {
+            const row = document.createElement('div');
+            row.className = 'sd-row';
+            const i = name.toLowerCase().indexOf(q.toLowerCase());
+            if (i >= 0) {
+                row.append(name.slice(0, i));
+                const b = document.createElement('b');
+                b.textContent = name.slice(i, i + q.length);
+                row.append(b, name.slice(i + q.length));
+            } else {
+                row.textContent = name;
+            }
+            row.dataset.name = name;
+            dd.appendChild(row);
+        });
+        dd.scrollTop = 0;
+        position();
+        dd.style.display = 'block';
+        setActive(0);
+    }
+
+    const isState = el => el && el.classList && el.classList.contains('state-input');
+
+    document.addEventListener('focusin', e => {
+        if (isState(e.target)) { current = e.target; e.target.setAttribute('autocomplete', 'off'); render(); }
+    });
+    document.addEventListener('input', e => {
+        if (isState(e.target)) { current = e.target; render(); }
+    });
+    document.addEventListener('focusout', e => { if (isState(e.target)) hide(); });
+    document.addEventListener('keydown', e => {
+        if (!isState(e.target) || dd.style.display === 'none') return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+        else if (e.key === 'Enter') {
+            const row = dd.querySelectorAll('.sd-row')[active];
+            if (row) { e.preventDefault(); choose(row.dataset.name); }
+        }
+        else if (e.key === 'Tab') {
+            const row = dd.querySelectorAll('.sd-row')[active];
+            if (row) choose(row.dataset.name);   // accept, then focus moves on as usual
+        }
+        else if (e.key === 'Escape') { hide(); }
+    });
+    // mousedown (not click) so the textbox doesn't lose focus first
+    dd.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const row = e.target.closest('.sd-row');
+        if (row) choose(row.dataset.name);
+    });
+    window.addEventListener('resize', position);
+    document.addEventListener('scroll', position, true);
+})();
 </script>
 <script src="../js/guard.js"></script>
 </body>
