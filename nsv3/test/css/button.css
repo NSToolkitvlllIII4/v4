@@ -1,0 +1,66 @@
+/* Buttons.
+   Base:      .btn           outlined, neutral
+   Variants:  .btn--primary  solid yellow (main action)
+              .btn--add      dashed yellow ("+ Add another")
+              .btn--danger   red (remove, discard)
+              .btn--ghost    no border, for small inline actions
+   Size:      .btn--icon     28px square for + and - */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid #4a4a4a;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Primary: solid yellow, inverts on hover */
+.btn--primary { background: var(--yellow); border-color: var(--yellow); color: var(--black); }
+.btn--primary:hover:not(:disabled) { background: transparent; border-color: var(--yellow); color: var(--yellow); }
+
+/* Add: dashed yellow, turns solid on hover */
+.btn--add { border-style: dashed; border-color: var(--yellow); color: var(--yellow); }
+.btn--add:hover:not(:disabled) { border-style: solid; background: var(--yellow-soft); }
+
+/* Danger */
+.btn--danger { border-color: var(--danger); color: var(--danger); }
+.btn--danger:hover:not(:disabled) { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+
+/* Ghost: text only */
+.btn--ghost { padding: 4px 8px; border-color: transparent; color: var(--muted); }
+.btn--ghost:hover:not(:disabled) { border-color: transparent; color: var(--text); }
+.btn--ghost.btn--danger { color: var(--danger); }
+.btn--ghost.btn--danger:hover:not(:disabled) { border-color: transparent; background: var(--danger-soft); color: var(--danger); }
+
+/* Icon: small square for + and - */
+.btn--icon { width: 28px; height: 28px; padding: 0; font-size: 16px; line-height: 1; }
+
+/* Feedback states, set by scripts (e.g. after copying) */
+.btn.is-copied { background: transparent; border-color: var(--yellow); color: var(--yellow); }
+.btn.is-failed { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+
+/* Small: for rows of choices */
+.btn--sm { padding: 4px 10px; font-size: 12px; }
+
+/* A row of buttons at the bottom of a group */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
