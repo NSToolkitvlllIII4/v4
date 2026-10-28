@@ -1,0 +1,137 @@
+<!-- One network's fields. Shared by every generic network: __NET__ is replaced with the network id,
+     and each network's config (js/config/networks.js) decides which fields show.
+     Bound to the active account in $store.networks; logic in js/components/network-section.js. -->
+<div class="stack" x-data="networkSection('__NET__')">
+
+  <!-- Plus report only -->
+  <fieldset class="fieldset" x-show="isPlus">
+    <legend>Match status</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="netId + '-match-' + d.id" value="matched" x-model="d.matchStatus"> Matched</label>
+      <label class="choice"><input type="radio" :name="netId + '-match-' + d.id" value="possible" x-model="d.matchStatus"> Possible</label>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Account presence</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="netId + '-acc-' + d.id" value="personal" x-model="d.accountType"> Personal</label>
+      <label class="choice"><input type="radio" :name="netId + '-acc-' + d.id" value="personal-page" x-model="d.accountType"> Personal page</label>
+      <label class="choice"><input type="radio" :name="netId + '-acc-' + d.id" value="business-page" x-model="d.accountType"> Business</label>
+      <label class="choice"><input type="radio" :name="netId + '-acc-' + d.id" value="no-page" x-model="d.accountType"> Public</label>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset" x-show="d.accountType === 'no-page'">
+    <legend>Identified on</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="netId + '-media-' + d.id" value="public post/s" x-model="d.mentionMedia"> Public post/s</label>
+      <label class="choice"><input type="radio" :name="netId + '-media-' + d.id" value="public photo/s" x-model="d.mentionMedia"> Public photo/s</label>
+      <label class="choice"><input type="radio" :name="netId + '-media-' + d.id" value="public video/s" x-model="d.mentionMedia"> Public video/s</label>
+    </div>
+  </fieldset>
+
+
+  <!-- Plus report -->
+  <div class="stack" x-show="isPlus">
+
+    <fieldset class="fieldset">
+      <legend>Identified by</legend>
+      <div class="input" x-link-field="d.idBy" data-placeholder="Identified by (e.g. Visual match, URL)"></div>
+    </fieldset>
+
+    <div class="stack" x-show="hasAccount">
+
+      <fieldset class="fieldset">
+        <legend>Metrics</legend>
+        <div class="field-grid">
+          <template x-for="m in cfg.metrics" :key="m.k">
+            <div class="field-row">
+              <label class="choice" :title="'Include ' + m.l + '?'">
+                <input type="checkbox" x-model="d.metrics[m.k].on" :aria-label="'Include ' + m.l">
+              </label>
+              <input class="input" type="text" data-metric :placeholder="'# ' + m.l"
+                     x-model="d.metrics[m.k].val" :disabled="!d.metrics[m.k].on">
+            </div>
+          </template>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset" x-show="hasDemographics">
+        <legend>Demographics</legend>
+        <div class="stack">
+          <input class="input" type="text" placeholder="Joined (e.g. Month &amp; Year)" x-show="cfg.joined" x-model="d.joined">
+          <div class="field-row" x-show="cfg.locPrev">
+            <label class="choice" title="Include previous city?"><input type="checkbox" x-model="d.loc.prev.on" aria-label="Include previous city"></label>
+            <input class="input" type="text" placeholder="From (City, State)" x-model="d.loc.prev.val" :disabled="!d.loc.prev.on">
+          </div>
+          <div class="field-row" x-show="cfg.locCurr">
+            <label class="choice" title="Include current city?"><input type="checkbox" x-model="d.loc.curr.on" aria-label="Include current city"></label>
+            <input class="input" type="text" placeholder="Lives in (City, State)" x-model="d.loc.curr.val" :disabled="!d.loc.curr.on">
+          </div>
+          <div class="field-row" x-show="cfg.workEd">
+            <label class="choice" title="Include employment?"><input type="checkbox" x-model="d.workEd.emp.on" aria-label="Include employment"></label>
+            <input class="input" type="text" placeholder="Nature of work" x-model="d.workEd.nature.val" :disabled="!d.workEd.emp.on">
+            <input class="input" type="text" placeholder="Employer" x-model="d.workEd.emp.val" :disabled="!d.workEd.emp.on">
+          </div>
+          <div class="field-row" x-show="cfg.workEd">
+            <label class="choice" title="Include school?"><input type="checkbox" x-model="d.workEd.school.on" aria-label="Include school"></label>
+            <input class="input" type="text" placeholder="Studied at (School)" x-model="d.workEd.school.val" :disabled="!d.workEd.school.on">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset" x-show="cfg.activity">
+        <legend>Account status</legend>
+        <div class="stack">
+          <div class="choice-group">
+            <label class="choice"><input type="radio" :name="netId + '-status-' + d.id" value="active" x-model="d.activity"> Active</label>
+            <label class="choice"><input type="radio" :name="netId + '-status-' + d.id" value="inactive" x-model="d.activity"> Inactive</label>
+            <label class="choice" x-show="!hidesPrivate"><input type="radio" :name="netId + '-status-' + d.id" value="private" x-model="d.activity"> Private</label>
+          </div>
+          <div class="field-row" x-show="d.activity === 'active'">
+            <input class="input" type="text" :placeholder="activityDatePlaceholder()" x-model="d.actDate">
+            <input class="input" type="text" :placeholder="activityActionPlaceholder()" x-model="d.actDetails">
+          </div>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <fieldset class="fieldset">
+      <legend>Findings</legend>
+      <div class="stack">
+        <div class="choice-group">
+          <label class="choice"><input type="radio" :name="netId + '-findings-' + d.id" value="relevant" x-model="d.finding"> Relevant info</label>
+          <label class="choice"><input type="radio" :name="netId + '-findings-' + d.id" value="none" x-model="d.finding"> No relevant info</label>
+        </div>
+        <input class="input" type="text" placeholder="Type of media &amp; RH details (e.g. 2 photos relating to...)"
+               x-show="d.finding === 'relevant'" x-model="d.mediaType">
+      </div>
+    </fieldset>
+
+  </div>
+
+  <!-- Progressive report -->
+  <fieldset class="fieldset" x-show="!isPlus">
+    <legend>Progressive findings</legend>
+    <div class="stack">
+      <template x-for="(f, i) in d.progFindings" :key="f.id">
+        <fieldset class="fieldset fieldset--compact">
+          <legend x-text="'Finding ' + (i + 1)"></legend>
+          <div class="stack">
+            <div class="choice-group">
+              <label class="choice"><input type="radio" :name="netId + '-pfind-' + f.id" value="none" x-model="f.type"> No findings found</label>
+              <label class="choice"><input type="radio" :name="netId + '-pfind-' + f.id" value="relevant" x-model="f.type"> Findings</label>
+            </div>
+            <textarea class="input" placeholder="Enter findings or text details here..." x-model="f.text"></textarea>
+            <button type="button" class="btn btn--ghost btn--danger" @click="removeFinding(i)"
+                    x-show="d.progFindings.length > 1">&minus; Remove this finding</button>
+          </div>
+        </fieldset>
+      </template>
+      <button type="button" class="btn btn--add" @click="addFinding()">+ Add another finding field</button>
+    </div>
+  </fieldset>
+
+</div>
