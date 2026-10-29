@@ -1,0 +1,65 @@
+/* Checkboxes and radios.
+   Checkbox = square, filled yellow with a check. Radio = round, yellow ring with a dot.
+   Markup:  <label class="choice"><input type="checkbox"> Label</label> */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-soft);
+  cursor: pointer;
+  user-select: none;
+  transition: color .15s;
+}
+.choice:hover,
+.choice:has(input:checked) { color: var(--text); }
+
+.choice input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  background: transparent;
+  border: 1.5px solid var(--muted);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.choice input::before {
+  content: "";
+  transform: scale(0);
+  transition: transform .12s;
+}
+.choice input:checked::before { transform: scale(1); }
+.choice:hover input:not(:checked):not(:disabled) { border-color: var(--text); }
+
+/* Checkbox */
+.choice input[type="checkbox"]:checked { background: var(--yellow); border-color: var(--yellow); }
+.choice input[type="checkbox"]::before {
+  width: 11px;
+  height: 9px;
+  background: var(--on-accent);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+/* Radio */
+.choice input[type="radio"] { border-radius: 50%; }
+.choice input[type="radio"]:checked { border-color: var(--yellow); }
+.choice input[type="radio"]::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+/* Disabled */
+.choice:has(input:disabled) { opacity: .4; cursor: not-allowed; }
+.choice input:disabled { cursor: not-allowed; }
+
+/* Groups of choices */
+.choice-group { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.field-row > .choice { white-space: nowrap; }

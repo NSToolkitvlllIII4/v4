@@ -1,0 +1,188 @@
+<!-- Other social medias. One kind of account at a time (the active account of $store.networks.byId.other).
+     Logic: js/components/other-section.js. Kinds and their counts: js/config/other-types.js -->
+<div class="stack" x-data="otherSection">
+
+  <fieldset class="fieldset">
+    <legend>Account type</legend>
+    <div class="choice-group" @change="d.hiddenMetrics = []"><!-- a new kind starts with all of its counts again -->
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="general" x-model="d.subType"> General</label>
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="ecommerce" x-model="d.subType"> E-commerce</label>
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="classmates" x-model="d.subType"> Classmates</label>
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="myspace" x-model="d.subType"> Myspace</label>
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="mugshot" x-model="d.subType"> Mugshot</label>
+      <label class="choice"><input type="radio" :name="'other-type-' + d.id" value="zoominfo" x-model="d.subType"> Zoominfo</label>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset" x-show="isNamed">
+    <legend>Network name</legend>
+    <input class="input" type="text" placeholder="e.g. Vimeo, Etsy, Yelp" x-model="d.networkName">
+  </fieldset>
+
+  <fieldset class="fieldset" x-show="isPlus">
+    <legend>Match status</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="'other-match-' + d.id" value="matched" x-model="d.matchStatus"> Matched</label>
+      <label class="choice"><input type="radio" :name="'other-match-' + d.id" value="possible" x-model="d.matchStatus"> Possible</label>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Account presence</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="'other-acc-' + d.id" value="personal" x-model="d.accountType"> Personal</label>
+      <label class="choice"><input type="radio" :name="'other-acc-' + d.id" value="personal-page" x-model="d.accountType"> Personal page</label>
+      <label class="choice"><input type="radio" :name="'other-acc-' + d.id" value="business-page" x-model="d.accountType"> Business</label>
+      <label class="choice"><input type="radio" :name="'other-acc-' + d.id" value="no-page" x-model="d.accountType"> Public</label>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset" x-show="d.accountType === 'no-page'">
+    <legend>Identified on</legend>
+    <div class="choice-group">
+      <label class="choice"><input type="radio" :name="'other-media-' + d.id" value="public post/s" x-model="d.mentionMedia"> Public post/s</label>
+      <label class="choice"><input type="radio" :name="'other-media-' + d.id" value="public photo/s" x-model="d.mentionMedia"> Public photo/s</label>
+      <label class="choice"><input type="radio" :name="'other-media-' + d.id" value="public video/s" x-model="d.mentionMedia"> Public video/s</label>
+    </div>
+  </fieldset>
+
+
+  <!-- Plus report -->
+  <div class="stack" x-show="isPlus">
+
+    <fieldset class="fieldset">
+      <legend>Identified by</legend>
+      <div class="input" x-link-field="d.idBy" data-placeholder="Identified by (e.g. Visual match, URL)"></div>
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend>Metrics</legend>
+      <div class="stack">
+        <div class="field-grid" x-show="metricRows.length || extras.length">
+          <!-- The kind's own counts -->
+          <template x-for="m in metricRows" :key="m.k">
+            <div class="field-row">
+              <label class="choice" :title="'Include ' + m.ui + '?'">
+                <input type="checkbox" x-model="d.metrics[m.k].on" :aria-label="'Include ' + m.ui">
+              </label>
+              <div class="input-wrap">
+                <input class="input" type="text" data-metric :placeholder="'# ' + m.ui"
+                       x-model="d.metrics[m.k].val" :disabled="!d.metrics[m.k].on">
+                <button type="button" class="input-x" @click="removeOwnMetric(m.k)" :aria-label="'Remove ' + m.ui" :title="'Remove ' + m.ui">&times;</button>
+              </div>
+            </div>
+          </template>
+          <!-- Counts added with "+ Add metric" -->
+          <template x-for="e in extras" :key="e.id">
+            <div class="field-row">
+              <div class="input-wrap">
+                <input class="input" type="text" data-metric :placeholder="'# ' + metricLabel(e.key)"
+                       :aria-label="metricLabel(e.key)" x-model="e.val">
+                <button type="button" class="input-x" @click="removeMetric(e.id)" :aria-label="'Remove ' + metricLabel(e.key)" :title="'Remove ' + metricLabel(e.key)">&times;</button>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- The "+" button: pick any other count to add -->
+        <div class="stack" @click.outside="menuOpen = false" @keydown.escape="menuOpen = false" x-show="available.length">
+          <button type="button" class="btn btn--add" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen">+ Add metric</button>
+          <div class="metric-picker" x-show="menuOpen">
+            <template x-for="m in available" :key="m.k">
+              <button type="button" class="btn btn--sm" @click="addMetric(m.k)" x-text="m.ui"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" x-show="hasLocation">
+      <legend>Location</legend>
+      <input class="input" type="text" placeholder="Listed location (City, State)" x-model="d.loc">
+    </fieldset>
+
+    <fieldset class="fieldset" x-show="d.subType === 'zoominfo'">
+      <legend>Employment &amp; education</legend>
+      <div class="stack">
+        <div class="field-row">
+          <label class="choice" title="Include employment?"><input type="checkbox" x-model="d.workEd.emp.on" aria-label="Include employment"></label>
+          <input class="input" type="text" placeholder="Nature of work" x-model="d.workEd.nature.val" :disabled="!d.workEd.emp.on">
+          <input class="input" type="text" placeholder="Employer" x-model="d.workEd.emp.val" :disabled="!d.workEd.emp.on">
+        </div>
+        <div class="field-row">
+          <label class="choice" title="Include school?"><input type="checkbox" x-model="d.workEd.school.on" aria-label="Include school"></label>
+          <input class="input" type="text" placeholder="Studied at (School)" x-model="d.workEd.school.val" :disabled="!d.workEd.school.on">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" x-show="d.subType === 'classmates'">
+      <legend>Education details</legend>
+      <div class="field-row">
+        <input class="input" type="text" placeholder="School name" x-model="d.school">
+        <input class="input" type="text" placeholder="Class of (year)" x-model="d.classYear">
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" x-show="d.subType === 'mugshot'">
+      <legend>Arrest details</legend>
+      <div class="stack">
+        <input class="input" type="text" placeholder="County &amp; state (e.g. Hillsborough County, Florida)" x-model="d.countyState">
+        <div class="field-row">
+          <input class="input" type="text" placeholder="Date (e.g. 11/05/2002)" x-model="d.arrestDate">
+          <input class="input" type="text" placeholder="Charge description" x-model="d.charge">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" x-show="hasStatus">
+      <legend>Account status</legend>
+      <div class="stack">
+        <div class="choice-group">
+          <label class="choice"><input type="radio" :name="'other-status-' + d.id" value="active" x-model="d.activity"> Active</label>
+          <label class="choice"><input type="radio" :name="'other-status-' + d.id" value="inactive" x-model="d.activity"> Inactive</label>
+        </div>
+        <div class="field-row" x-show="d.activity === 'active'">
+          <input class="input" type="text" placeholder="Date (Month Day, Year)" x-model="d.actDate">
+          <input class="input" type="text" placeholder="Action (e.g. shared a post)" x-model="d.actDetails" x-show="hasActivityAction">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend>Findings</legend>
+      <div class="stack">
+        <div class="choice-group">
+          <label class="choice"><input type="radio" :name="'other-find-' + d.id" value="relevant" x-model="d.finding"> Relevant info</label>
+          <label class="choice"><input type="radio" :name="'other-find-' + d.id" value="none" x-model="d.finding"> No relevant info</label>
+        </div>
+        <input class="input" type="text" placeholder="Type of media &amp; RH details (e.g. 2 photos relating to...)"
+               x-show="d.finding === 'relevant'" x-model="d.mediaType">
+      </div>
+    </fieldset>
+
+  </div>
+
+  <!-- Progressive report -->
+  <fieldset class="fieldset" x-show="!isPlus">
+    <legend>Progressive findings</legend>
+    <div class="stack">
+      <template x-for="(f, i) in d.progFindings" :key="f.id">
+        <fieldset class="fieldset fieldset--compact">
+          <legend x-text="'Finding ' + (i + 1)"></legend>
+          <div class="stack">
+            <div class="choice-group">
+              <label class="choice"><input type="radio" :name="'other-pfind-' + f.id" value="none" x-model="f.type"> No findings found</label>
+              <label class="choice"><input type="radio" :name="'other-pfind-' + f.id" value="relevant" x-model="f.type"> Findings</label>
+            </div>
+            <textarea class="input" placeholder="Enter findings or text details here..." x-model="f.text"></textarea>
+            <button type="button" class="btn btn--ghost btn--danger" @click="removeFinding(i)"
+                    x-show="d.progFindings.length > 1">&minus; Remove this finding</button>
+          </div>
+        </fieldset>
+      </template>
+      <button type="button" class="btn btn--add" @click="addFinding()">+ Add another finding field</button>
+    </div>
+  </fieldset>
+
+</div>

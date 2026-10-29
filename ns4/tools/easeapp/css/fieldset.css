@@ -1,0 +1,25 @@
+/* Fieldset: a labeled group of related controls.
+   The border lights up while you work inside the group. */
+.fieldset {
+  min-width: 0;
+  padding: 4px 16px 16px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  transition: border-color .15s;
+}
+.fieldset:focus-within { border-color: var(--yellow); }
+
+.fieldset > legend {
+  margin-left: -8px; /* keeps the legend text aligned with the content below */
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* A group inside a group flips back to black so the nesting stays readable. */
+.fieldset .fieldset { background: var(--bg); }
+
+/* Tighter version for clones and sub-groups. */
+.fieldset--compact { padding: 2px 12px 12px; }
+.fieldset--compact > legend { font-size: 13px; }
